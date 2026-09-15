@@ -1,10 +1,8 @@
 name: Workflow Watchdog
 
-# Backup-dispatches linkedin_watch.yml (hourly) and scrape_jobs.yml (daily) if
-# the GitHub Actions scheduler silently skips a slot. Fires at minute :33 of
-# the same active window as linkedin_watch, well after that workflow's :13
-# slot (~20 min after the scheduled fire — past normal GH latency). :33 is
-# off-peak, so this fallback is less likely to be throttled than :00.
+# Backup-dispatches the active LinkedIn and Indeed watchers if the GitHub
+# Actions scheduler silently skips a slot. Legacy priority-employer and
+# US-specific workflows are intentionally excluded.
 on:
   schedule:
     - cron: "33 15-23,0-3 * * *"
@@ -71,25 +69,3 @@ jobs:
           fi
           echo "No indeed_watch run in $current_hour, dispatching backup"
           gh -R ${{ github.repository }} workflow run indeed_watch.yml --ref main
-
-      - name: Priority Employer — dispatch backup if >25h stale
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -e
-          last=$(gh -R ${{ github.repository }} run list \
-            --workflow=scrape_jobs.yml --limit 1 \
-            --json createdAt,status)
-          status=$(echo "$last" | jq -r '.[0].status')
-          createdAt=$(echo "$last" | jq -r '.[0].createdAt')
-          if [ "$status" = "in_progress" ] || [ "$status" = "queued" ]; then
-            echo "scrape_jobs in flight ($status); nothing to do"
-            exit 0
-          fi
-          hours_since=$(python3 -c "from datetime import datetime, timezone; d=datetime.fromisoformat('$createdAt'.replace('Z','+00:00')); print(int((datetime.now(timezone.utc)-d).total_seconds()/3600))")
-          if [ "$hours_since" -lt 25 ]; then
-            echo "scrape_jobs ran ${hours_since}h ago; nothing to do"
-            exit 0
-          fi
-          echo "scrape_jobs stale (${hours_since}h), dispatching backup"
-          gh -R ${{ github.repository }} workflow run scrape_jobs.yml --ref main

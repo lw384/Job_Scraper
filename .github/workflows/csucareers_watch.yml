@@ -1,9 +1,7 @@
 name: CSU Careers Watcher
 
 on:
-  # Daily, offset from CalCareers and local-gov watchers.
-  schedule:
-    - cron: "37 16 * * *"
+  # Legacy California-specific source: retained for optional manual use only.
   workflow_dispatch:
 
 concurrency:

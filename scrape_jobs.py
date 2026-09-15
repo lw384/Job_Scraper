@@ -45,7 +45,7 @@ HEADERS = {
 # Config — ALL of a user's search settings live in config.json (edit it by hand
 # or generate it from a CV; see docs/cv-to-config-prompt.md). config.example.json
 # (committed, always present) supplies the base values; config.json (personal,
-# gitignored) is deep-merged on top key-by-key, so an older/partial config.json
+# tracked in this fork and containing no secrets) is deep-merged on top key-by-key, so an older/partial config.json
 # missing a newer key still picks up the example's value for it. There are no
 # separate hardcoded Python defaults to keep in sync — a totally unreadable
 # config is fatal rather than silently scraping nothing.
@@ -105,6 +105,16 @@ def _cfg(path: str, default):
     return cur if cur not in (None, "", [], {}) else default
 
 
+def _cfg_allow_empty(path: str, default):
+    """Nested lookup where an explicit empty list/dict disables a fallback."""
+    cur = CONFIG
+    for key in path.split("."):
+        if not isinstance(cur, dict) or key not in cur:
+            return default
+        cur = cur[key]
+    return default if cur is None else cur
+
+
 # Short field label + geo subtitle for the digest titles, from config.profile.
 # e.g. "Engineering Job Tracker" → "Engineering".
 PROFILE_LABEL = re.sub(
@@ -113,11 +123,9 @@ PROFILE_LABEL = re.sub(
 PROFILE_SUBTITLE = str(_cfg("profile.subtitle", "All locations"))
 
 # Title keywords, from config.json → keywords.include. A title matches if it
-# contains any of these (case-insensitive). See config.example.json for the
-# documented default list and tuning notes (deliberately tight — generic
-# titles like "Research Scientist" or "Professor" are left out because they
-# pull in unrelated roles; qualified forms like "Environmental Data Scientist"
-# still match via "environmental data").
+# contains any of these (case-insensitive). The committed example is
+# intentionally domain-neutral and empty, so a missing personal config safely
+# produces no matches rather than running somebody else's search profile.
 KEYWORDS = _cfg("keywords.include", [])
 
 # Seconds to wait between API probes — keeps us polite
@@ -131,6 +139,8 @@ FRESH_JOB_LOOKBACK = timedelta(hours=24)
 # Titles containing any excluded term are dropped (config.json → keywords.exclude).
 # Single tokens are word-bounded; multi-word phrases match as substrings.
 def _build_title_re(terms: list) -> re.Pattern:
+    if not terms:
+        return re.compile(r"(?!)")
     return re.compile(
         "|".join(re.escape(t) if (" " in t or "&" in t) else rf"\b{re.escape(t)}\b" for t in terms),
         re.IGNORECASE,
@@ -141,13 +151,7 @@ EXCLUDED_SENIORITY_RE = _build_title_re(_cfg("keywords.exclude", []))
 
 # Multi-word phrases keep substring semantics; single-word keywords ("mle",
 # "devops") are word-bounded so they can't match inside a word ("Hamlet").
-_KEYWORD_RE = re.compile(
-    "|".join(
-        re.escape(k) if " " in k else rf"\b{re.escape(k)}\b"
-        for k in KEYWORDS
-    ),
-    re.IGNORECASE,
-)
+_KEYWORD_RE = _build_title_re(KEYWORDS)
 
 # ---------------------------------------------------------------------------
 # Fuzzy pre-filter — deliberately BROAD. Used by the LinkedIn partitioned
@@ -276,70 +280,34 @@ def text_matches_keywords(title: str, *parts: str) -> bool:
     return bool(_KEYWORD_RE.search(text))
 
 
-# Geographic scope for the curated/legacy ATS path and the NEOGOV board (which
-# is nationwide and needs post-filtering). (The LinkedIn and Indeed watchers
-# geo-filter at the API level — see LINKEDIN_GEOS / INDEED_GEOS.) Config.json →
-# location_filter.terms; case-insensitive substring match on the job location.
+# Basic discovery scope for sources that need post-filtering. This is deliberately
+# not a remote-eligibility classifier: a configured "Remote" term keeps a remote
+# result even when the posting's permitted employment geography is still unclear.
+# Config: location_filter.terms.
 TARGET_LOCATIONS = [str(t).lower() for t in _cfg("location_filter.terms", [])]
 
-# Countries to reject even if a target substring matches (e.g. ", ca" matches
-# "Canada", ", wa" matches "Wales"). LinkedIn's "Remote" geo returns global jobs.
-# Multi-word country names are matched as substrings; single-word names are
-# matched with word boundaries to avoid false positives like "india" matching
-# "Indiana" or "mexico" matching "New Mexico".
-NON_US_COUNTRIES_MULTI = [
-    "united kingdom", "south korea", "south africa", "new zealand",
-    "saudi arabia", "united arab emirates",
-]
-NON_US_COUNTRIES_SINGLE = [
-    "canada", "australia", "uk", "england", "scotland",
-    "wales", "ireland", "germany", "france", "netherlands", "switzerland",
-    "sweden", "norway", "denmark", "finland", "spain", "portugal", "italy",
-    "india", "singapore", "japan", "china", "brazil",
-    "mexico", "argentina", "belgium",
-    "austria", "poland", "czech", "romania", "hungary", "israel",
-    "qatar", "egypt",
-]
-_NON_US_COUNTRY_RE = re.compile(
-    r'\b(?:' + '|'.join(re.escape(c) for c in NON_US_COUNTRIES_SINGLE) + r')\b'
-)
+
+def _normalized_location(value: str) -> str:
+    """Normalize separators while preserving phrase boundaries."""
+    return re.sub(r"[^a-z0-9]+", " ", str(value or "").lower()).strip()
 
 
-# US state full names (lowercased) — used to override country-match false
-# positives like "New Mexico" (contains "mexico") and "Indiana" (contains
-# "india"). Hardcoded because the 50 state names don't change.
-_US_STATE_NAMES = [
-    "alabama", "alaska", "arizona", "arkansas", "california", "colorado",
-    "connecticut", "delaware", "florida", "georgia", "hawaii", "idaho",
-    "illinois", "indiana", "iowa", "kansas", "kentucky", "louisiana",
-    "maine", "maryland", "massachusetts", "michigan", "minnesota",
-    "mississippi", "missouri", "montana", "nebraska", "nevada",
-    "new hampshire", "new jersey", "new mexico", "new york",
-    "north carolina", "north dakota", "ohio", "oklahoma", "oregon",
-    "pennsylvania", "rhode island", "south carolina", "south dakota",
-    "tennessee", "texas", "utah", "vermont", "virginia", "washington",
-    "west virginia", "wisconsin", "wyoming",
-]
+def _location_term_matches(location: str, term: str) -> bool:
+    """Match a configured location as complete normalized words/phrases.
+
+    Word boundaries matter for short terms such as "UK": a location such as
+    "Phuket" must not be accepted merely because it contains the letters "uk".
+    """
+    loc = _normalized_location(location)
+    wanted = _normalized_location(term)
+    if not loc or not wanted:
+        return False
+    pattern = r"(?<![a-z0-9])" + re.escape(wanted).replace(r"\ ", r"\s+") + r"(?![a-z0-9])"
+    return bool(re.search(pattern, loc))
 
 
 def is_target_location(location: str) -> bool:
-    if not location:
-        return False
-    loc = location.lower()
-    # If a US state full name matches, accept immediately — this handles
-    # "New Mexico" (contains "mexico") and "Indiana" (contains "india")
-    # which would otherwise be rejected by the country check below.
-    if any(state in loc for state in _US_STATE_NAMES):
-        return True
-    # Reject non-US countries — prevents ", ca" matching "Canada", etc.
-    # Multi-word countries: substring match (safe, distinctive phrases).
-    if any(country in loc for country in NON_US_COUNTRIES_MULTI):
-        return False
-    # Single-word countries: word-boundary match (prevents "india" matching
-    # "Indiana", "mexico" matching "New Mexico", etc.).
-    if _NON_US_COUNTRY_RE.search(loc):
-        return False
-    return any(place in loc for place in TARGET_LOCATIONS)
+    return any(_location_term_matches(location, place) for place in TARGET_LOCATIONS)
 
 
 def _parse_posted_at(value: str, *, now: datetime | None = None) -> datetime | None:
@@ -1045,19 +1013,19 @@ INDEED_GEOS = _cfg("locations.indeed", [])
 INDEED_SEARCH_TERMS = _cfg("search_terms.indeed", [])
 GLASSDOOR_LOOKBACK_HOURS = 24
 GLASSDOOR_BACKFILL_DAYS = 30
-GLASSDOOR_GEOS = _cfg("locations.glassdoor", INDEED_GEOS)
-GLASSDOOR_SEARCH_TERMS = _cfg("search_terms.glassdoor", INDEED_SEARCH_TERMS)
+GLASSDOOR_GEOS = _cfg_allow_empty("locations.glassdoor", INDEED_GEOS)
+GLASSDOOR_SEARCH_TERMS = _cfg_allow_empty("search_terms.glassdoor", INDEED_SEARCH_TERMS)
 ZIPRECRUITER_LOOKBACK_HOURS = 24
 ZIPRECRUITER_BACKFILL_DAYS = 30
-ZIPRECRUITER_GEOS = _cfg("locations.ziprecruiter", [
+ZIPRECRUITER_GEOS = _cfg_allow_empty("locations.ziprecruiter", [
     geo for geo in INDEED_GEOS
     if str(geo.get("country", "")).lower() in {"usa", "us", "united states", "canada"}
 ])
-ZIPRECRUITER_SEARCH_TERMS = _cfg("search_terms.ziprecruiter", INDEED_SEARCH_TERMS)
+ZIPRECRUITER_SEARCH_TERMS = _cfg_allow_empty("search_terms.ziprecruiter", INDEED_SEARCH_TERMS)
 GOOGLE_JOBS_LOOKBACK_HOURS = 24
 GOOGLE_JOBS_BACKFILL_DAYS = 30
-GOOGLE_JOBS_GEOS = _cfg("locations.google_jobs", INDEED_GEOS)
-GOOGLE_JOBS_SEARCH_TERMS = _cfg("search_terms.google_jobs", INDEED_SEARCH_TERMS)
+GOOGLE_JOBS_GEOS = _cfg_allow_empty("locations.google_jobs", INDEED_GEOS)
+GOOGLE_JOBS_SEARCH_TERMS = _cfg_allow_empty("search_terms.google_jobs", INDEED_SEARCH_TERMS)
 GOOGLE_JOBS_QUERIES = _cfg("google_jobs.queries", [])
 
 
@@ -1310,7 +1278,22 @@ def _google_jobs_query(term: str, geo: dict, hours_old: int) -> str:
 
 def _google_jobs_query_contexts(hours_old: int) -> list[tuple[str, dict]]:
     if GOOGLE_JOBS_QUERIES:
-        return [(str(q).strip(), {}) for q in GOOGLE_JOBS_QUERIES if str(q).strip()]
+        contexts = []
+        for item in GOOGLE_JOBS_QUERIES:
+            if isinstance(item, dict):
+                query = str(item.get("query", "") or "").strip()
+                geo = {
+                    key: item[key]
+                    for key in ("location", "country")
+                    if item.get(key)
+                }
+            else:
+                # Keep backwards compatibility with existing string-only configs.
+                query = str(item or "").strip()
+                geo = {}
+            if query:
+                contexts.append((query, geo))
+        return contexts
     return [
         (_google_jobs_query(term, geo, hours_old), geo)
         for geo in GOOGLE_JOBS_GEOS
@@ -1334,6 +1317,9 @@ def _google_jobs_gl(geo: dict) -> str:
         "gb": "gb",
         "uk": "gb",
         "united kingdom": "gb",
+        "cn": "cn",
+        "china": "cn",
+        "singapore": "sg",
     }.get(country, country[:2] or "us")
 
 
@@ -1665,7 +1651,7 @@ def scrape_google_jobs_recent(hours_old: int | None = None) -> list:
 HIRINGCAFE_LOOKBACK_DAYS = 30
 HIRINGCAFE_BACKFILL_DAYS = 61
 HIRINGCAFE_MAX_PAGES = max(1, int(_cfg("hiring_cafe.max_pages", 3)))
-HIRINGCAFE_SEARCH_TERMS = _cfg("search_terms.hiring_cafe", INDEED_SEARCH_TERMS)
+HIRINGCAFE_SEARCH_TERMS = _cfg_allow_empty("search_terms.hiring_cafe", INDEED_SEARCH_TERMS)
 
 HIRINGCAFE_HEADERS = {
     "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "

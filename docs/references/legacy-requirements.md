@@ -1,8 +1,8 @@
 > **Superseded scope — historical reference.** This document describes an earlier
 > project scope and is retained without rewriting its historical content. It is
 > no longer authoritative for the current Job Search OS roadmap. Current direction
-> is defined by [ROADMAP.md](ROADMAP.md); current agent operating rules are defined
-> by [AGENTS.md](../AGENTS.md). Its phase numbers and database/Notion prohibitions
+> is defined by [ROADMAP.md](../ROADMAP.md); current agent operating rules are defined
+> by [AGENTS.md](../../AGENTS.md). Its phase numbers and database/Notion prohibitions
 > belong to that earlier scope.
 
 # ScottCoffin Job_Scraper — Codex 分阶段改造执行方案

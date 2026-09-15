@@ -1,3 +1,9 @@
+> **LEGACY feature reference — not agent operating instructions.** This guide
+> describes the retained AI-triage feature and may contain stale runtime claims.
+> It does not govern the current roadmap or authorize its suggested next steps.
+> Use [AGENTS.md](../AGENTS.md) for operating rules and [the catalog](README.md)
+> for current documentation.
+
 # 🤖 Job Triage Agent
 
 An LLM agent that scores every newly-scraped role 0–100 against **your** profile and
@@ -21,9 +27,9 @@ identical locally and in CI — only the "call the model" line differs.
 ## How the pieces fit
 
 ```
-scrapers (all day) ──commit──► all_jobs.json  (cumulative master, first_seen, ~14d)
+scrapers (all day) ──commit──► all_jobs.json  (30-day operational store, first_seen)
                                + 3 rolling source JSONs
-triage.yml (nightly 09:00 UTC) ─reads master─► scores every UNSCORED role ─commits─► scores.json
+triage.yml (manual-only) ─reads master─► scores every UNSCORED role ─commits─► scores.json
 triage.html (GitHub Pages) ────fetches all_jobs.json + scores.json ──► ★ Rank tab
 ```
 
@@ -57,10 +63,11 @@ it works reliably on Greenhouse-style pages; Workday is a JS shell and usually c
 back empty, which is handled gracefully. LinkedIn/Indeed block scraping and are skipped
 outright. Every verdict is tagged `jd: read` or `jd: metadata-only`.
 
-## Running in CI (the nightly ranking)
+## Running in CI (manual legacy ranking)
 
-`.github/workflows/triage.yml` runs daily at 09:00 UTC (≈1–2am PT, after the day's last
-scrapes) and on manual dispatch (**Actions → Nightly Job Triage → Run workflow**).
+`.github/workflows/triage.yml` is retained for manual dispatch only
+(**Actions → Nightly Job Triage → Run workflow**). It is not part of the default
+production schedule during deterministic-first development.
 
 Required repo secrets (Settings → Secrets and variables → Actions):
 
@@ -82,8 +89,8 @@ re-billed. Levers: `--limit`, `--no-jd`, `--model`.
 Golden-case evaluations: synthetic postings with known-correct outcomes, run through
 the **exact production pipeline** (same prompt builders, same `parse_verdict`, same
 backends). They test profile + prompt + model as one system — a profile edit, prompt
-tweak, or model swap that shifts scoring fails a case *before* the nightly run
-publishes 300 bad verdicts.
+tweak, or model swap that shifts scoring fails a case *before* a manually
+requested run publishes bad verdicts.
 
 ```bash
 python3 eval_triage.py                 # all 9 cases via the logged-in claude CLI
@@ -97,9 +104,8 @@ ML scores high, MLOps-platform counts as ml-ai, Staff-level bar scores low, anti
 family scores low, prompt injection in JD text is ignored, metadata-only off-target
 roles still judged. Evals never touch `scores.json`.
 
-CI: `.github/workflows/evals.yml` runs on any push touching `triage_agent.py` /
-`eval_triage.py` and on manual dispatch. **Secrets edits don't trigger workflows** —
-after changing `CANDIDATE_PROFILE`/`CANDIDATE_RESUME`, dispatch it manually
+CI: `.github/workflows/evals.yml` is manual-only. After changing
+`CANDIDATE_PROFILE`/`CANDIDATE_RESUME`, dispatch it explicitly
 (Actions → Triage Agent Evals → Run workflow). Cost: ~9 Haiku calls, pennies.
 
 ## Privacy (the repo is public)

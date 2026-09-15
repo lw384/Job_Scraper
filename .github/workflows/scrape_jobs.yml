@@ -1,11 +1,8 @@
 name: Priority Employer Digest
 
 on:
-  schedule:
-    # 03:13 UTC ≈ 8 PM PDT (UTC-7); in PST (UTC-8) ~7 PM PT.
-    # Off-hour minute (:13) avoids GitHub Actions throttling at :00.
-    - cron: "13 3 * * *"
-
+  # Legacy priority-employer source: retained for optional manual use, but it
+  # is not part of the default production schedule.
   workflow_dispatch:
     inputs:
       backfill:
@@ -40,7 +37,7 @@ jobs:
           if [ "${{ github.event.inputs.backfill }}" = "true" ]; then
             python scrape_jobs.py --priority-backfill
           else
-            python scrape_jobs.py --biotech-only
+            python scrape_jobs.py --priority-only
           fi
         env:
           PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
@@ -58,7 +55,7 @@ jobs:
               data = json.load(f)
 
           entry = {
-              "workflow": "biotech",
+              "workflow": "priority",
               "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
               "job_count": int(data.get("total", 0)),
               "run_id": os.environ.get("GITHUB_RUN_ID", ""),

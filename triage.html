@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Job Triage — Environmental / Toxicology (California)</title>
+<title>Job Discovery &amp; Triage</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -343,7 +343,7 @@
   .scorechip.fit { cursor: help; }
   .scorechip.top { box-shadow: 0 0 0 1px rgba(34,197,94,0.5); }
 
-  /* Priority-topic star/highlight (microplastics, ecotox, EDCs, R/Shiny) */
+  /* Config-driven priority-topic star/highlight */
   .job.starred { outline: 1.5px solid rgba(251,191,36,0.55); outline-offset: -1px;
     background: rgba(251,191,36,0.06); }
   .starbadge { color: #fbbf24; font-size: 14px; margin-right: 4px; cursor: help;
@@ -402,7 +402,7 @@
 
 <header>
   <h1>Job Triage</h1>
-  <span class="sub" id="snapshot-line" aria-live="polite" aria-atomic="true">California · Environmental / Toxicology · loading…</span>
+  <span class="sub" id="snapshot-line" aria-live="polite" aria-atomic="true">Configure locations in config.json · loading…</span>
   <span class="grow"></span>
   <div class="theme-toggle" id="theme-controls" aria-label="Theme">
     <button type="button" data-theme-mode="system" title="Match system theme">System</button>
@@ -510,7 +510,7 @@
   <div class="controls-row">
     <span class="pillgroup-label">Highlight</span>
     <button type="button" class="pill" id="star-only" aria-pressed="false"
-      title="Show only roles touching microplastics, ecotoxicology, EDCs, or R/Shiny">★ Priority topics</button>
+      title="Show only roles matching priority topics from config.json">★ Priority topics</button>
   </div>
   <div class="controls-row">
     <span class="pillgroup-label">Salary</span>
@@ -660,31 +660,14 @@
 
   // Company exclusion — drop roles from these companies (case-insensitive
   // substring on the company name). Mirrors employers.exclude in config.json.
-  let EXCLUDE_COMPANY = [
-    'pharmaceutic', 'pharma ', 'therapeutics', 'biopharma', 'biotech', 'biologics',
-    'biosciences', 'genomics', 'oncolog', 'biomedicine', 'genentech', 'gilead',
-    'pfizer', 'merck', 'novartis', 'abbvie', 'regeneron', 'moderna', 'biogen',
-    'sanofi', 'astrazeneca', 'takeda', 'biomarin', 'alnylam', 'incyte', 'exelixis',
-    'neurocrine', 'ionis', 'denali', 'acadia', 'adarx', 'genmab', 'galapagos',
-    'insitro', 'recursion', 'cytokinetics', 'vertex pharm', 'bristol-myers', 'bristol myers',
-  ];
-  function isPharma(company) {
+  let EXCLUDE_COMPANY = [];
+  function isExcludedCompany(company) {
     const c = (company || '').toLowerCase();
     return EXCLUDE_COMPANY.some(t => t && c.includes(t));
   }
 
   // Role buckets for the Role filter: [name, RegExp], applied top-to-bottom.
-  let ROLE_CATS = [
-    ['Toxicology', /toxicolog/],
-    ['Risk/Exposure', /risk assess|exposure|hazard|dose.response|pharmacokinetic|toxicokinetic/],
-    ['Water', /water|drinking water|watershed|aquatic|marine|limnolog/],
-    ['Contaminants', /microplastic|nanoplastic|pfas|contaminant|pollution|remediation/],
-    ['Environmental Health', /environmental health|epidemiolog|public health/],
-    ['Environmental Science', /environmental|ecolog|sustainab|conservation|chemist/],
-    ['Policy/Regulatory', /policy|regulatory|stewardship|registration|reach\b|affairs/],
-    ['Data Science', /data scien|data analyst|biostatistic|informatic/],
-    ['Academic', /professor|faculty|lecturer/],
-  ];
+  let ROLE_CATS = [];
   let ROLE_NAMES = ROLE_CATS.map(r => r[0]).concat('Other');
   function classifyRole(title) {
     const t = (title || '').toLowerCase();
@@ -781,52 +764,26 @@
     if (/\b(u\.?s\.?\s+|state of |county of |city of |town of |port of )/i.test(j.company)) return 'Government';
     if (/\b(department|agency|bureau|office|division|board|commission|authority|district)\b/.test(co)
         && !/consulting|consultants|inc\.|llc|corp|ltd/.test(co)) return 'Government';
-    if (/\bepa\b|environmental protection agency|ca\.?\s*oehha|\bcdfw\b|\bcdtsc\b|\bswrcb\b|\bcarb\b|\bcdph\b|\bnoaa\b|\bnist\b|\bniehs\b|\bnih\b|\busgs\b|\bfda\b|\bnps\b|army corps|air force|navy |dept\. of /.test(co)) return 'Government';
+    if (/\bdept\. of |\bministry of |\bpublic service\b/.test(co)) return 'Government';
     if (/\b(county|municipalities|municipal)\b/.test(co) && !/inc\.|llc|corp/.test(co)) return 'Government';
 
     // Academic — universities, colleges, research institutes attached to academia.
     if (/\b(university|université|college|polytechnic|institute of technology|community college|school of medicine|graduate school)\b/.test(co)) return 'Academic';
-    if (/\b(uc |cal poly|caltech|stanford|mit |harvard|yale |ucla|ucsd|ucsb|uci |ucr |ucsc|ucd )\b/.test(co)) return 'Academic';
-
     // Non-profit — foundations, conservancies, advocacy orgs, research NGOs.
-    if (/\b(foundation|conservancy|conservation|alliance|coalition|league|society|federation|greenpeace|audubon|sierra club|nature conservancy|natural resources defense|earthjustice|wildlife fund|environmental defense|waterkeeper|clean water|clean air|public interest)\b/.test(co)) return 'Non-profit';
+    if (/\b(foundation|charity|charitable|alliance|coalition|league|society|federation|public interest)\b/.test(co)) return 'Non-profit';
     if (/\b(institute|center|centre)\b/.test(co) && !/inc\.|llc|corp\.|ltd\.|consulting/.test(co)) return 'Non-profit';
     if (/\bnon-?profit\b|\b501\s*\(?c\)?/.test(co)) return 'Non-profit';
 
-    // Consulting — environmental/engineering consultancies.
-    if (/\b(stantec|arcadis|ramboll|aecom|tetra\s*tech|brown and caldwell|cdm\s*smith|kleinfelder|exponent|hdr\b|wspa\b|golder|jacobs\b|wood\s*plc|arup\b|aptim\b|icf\b|roux\s*assoc|gradient\b|environ\b|gssi\b|scs\s*engineers)\b/.test(co)) return 'Consulting';
+    // Consulting — classify by the organization name, without a domain list.
     if (/\bconsult(ing|ant|ants|ancy)?\b/.test(co)) return 'Consulting';
 
     return 'Industry';
   }
 
   // ---------- Resume-fit scoring (client-side, deterministic) ----------
-  // Weighted keywords from Dr. Coffin's specializations. Title matches count
-  // ~3x (title is the strongest signal); company / agent "why" text also count.
-  // Tune these weights freely — higher = stronger pull toward the top of Rank.
-  let FIT_TERMS = [
-    // Tier 1 — his signature topics
-    [/microplastic|nanoplastic|plastic pollution|microfiber/, 12],
-    [/ecotoxicolog/, 12],
-    [/risk assess|risk character|human health risk|ecological risk/, 11],
-    [/\bexposure\b|exposure assess|exposure scien/, 10],
-    [/\bqsar\b|read-across|structure.activity/, 11],
-    [/\bpfas\b|per- and polyfluoro|perfluoro|forever chemical/, 10],
-    // Tier 2 — core toxicology / methods
-    [/toxicolog/, 8],
-    [/pharmacokinetic|toxicokinetic|\bpbpk\b/, 8],
-    [/dose.response|benchmark dose|\bbmd\b/, 7],
-    [/computational tox|predictive tox|new approach method|\bnam\b|in vitro|high.throughput/, 8],
-    [/emerging contaminant|\bcec\b|contaminant|pollutant/, 6],
-    [/drinking water|water quality|wastewater|recycled water|potable reuse/, 7],
-    [/hazard (?:assess|identification|character)/, 6],
-    [/endocrine|bioaccumulat|sediment|aquatic|marine|estuar/, 5],
-    // Tier 3 — adjacent / skills
-    [/environmental health|environmental chemist|environmental scien/, 4],
-    [/regulatory|policy|standard setting|guidance/, 4],
-    [/data scien|machine learning|\bshiny\b|\br programming\b|biostatistic|modeling|modelling/, 4],
-    [/cheminformatic|chemical safety|chemical risk|product steward/, 5],
-  ];
+  // Domain-neutral fallback. Personal rules are loaded from
+  // scoring_profile.json when present.
+  let FIT_TERMS = [];
   let SIGNATURE_TERMS = [];
   let POOR_FIT_TERMS = [];
   let FIT_SETTINGS = {
@@ -1049,12 +1006,7 @@
   // ---------- Priority-topic star ----------
   // Flag (★) roles touching signature topics, scanning title + company +
   // description. Default fallback; overridden by config.json → priority_topics.
-  let STAR_TERMS = [
-    ['microplastics', /microplastic|nanoplastic|microfiber/i],
-    ['ecotoxicology', /ecotoxicolog/i],
-    ['endocrine-disrupting chemicals', /endocrine[\s-]?disrupt|\bedcs?\b/i],
-    ['R / Shiny', /\brshiny\b|\br[\s-]?shiny\b|shiny\s*(?:app|dashboard|server)|\bshiny\b/i],
-  ];
+  let STAR_TERMS = [];
   function starHits(j) {
     const text = `${j.title || ''} ${j.company || ''} ${j.description || ''}`;
     return STAR_TERMS.filter(([, re]) => re.test(text)).map(([name]) => name);
@@ -1277,7 +1229,7 @@
     });
     if (okCount === 0) throw new Error('all sources failed');
     const jobs = [...byUrl.values()]
-      .filter(j => !isPharma(j.company))   // env-tox only — drop pharma/drug-dev
+      .filter(j => !isExcludedCompany(j.company))
       .sort((a, b) => (b.date_posted || '').localeCompare(a.date_posted || ''));
     return { scraped_at, new_count, new_jobs, jobs };
   }
@@ -1890,10 +1842,8 @@
   }
 
   // ---------- Map view (Leaflet) ----------
-  // Client-side geocoding via a static city/region → [lat,lng] table covering
-  // California, Oregon, and Australia (no API key, no network). Jobs cluster by
-  // location; the view auto-fits to wherever they are. Remote/unknown roles get
-  // a single marker at the California center.
+  // Client-side geocoding via a static city/region → [lat,lng] table (no API
+  // key). Jobs cluster by location and the view auto-fits to available points.
   const CITY_COORDS = {
     'sacramento': [38.5816, -121.4944], 'west sacramento': [38.5805, -121.5302],
     'davis': [38.5449, -121.7405], 'rancho cordova': [38.5891, -121.3027],
@@ -1996,10 +1946,10 @@
     'dallas': [32.7767, -96.797], 'phoenix': [33.4484, -112.074],
     'anchorage': [61.2181, -149.9003], 'honolulu': [21.3069, -157.8583],
   };
-  const CA_CENTER = [37.4, -119.5];
+  const DEFAULT_MAP_CENTER = [20, 0];
   const US_CENTROID = [39.5, -98.0];
   // Full US state names (USAJOBS uses these) → fall back to the US centroid
-  // when no city matched, so federal roles don't pile onto California.
+  // when no city matched, so federal roles share a stable region marker.
   const US_STATE_RE = /\b(alabama|alaska|arizona|arkansas|colorado|connecticut|delaware|florida|georgia|hawaii|idaho|illinois|indiana|iowa|kansas|kentucky|louisiana|maine|maryland|massachusetts|michigan|minnesota|mississippi|missouri|montana|nebraska|nevada|new hampshire|new jersey|new mexico|new york|north carolina|north dakota|ohio|oklahoma|pennsylvania|rhode island|south carolina|south dakota|tennessee|texas|utah|vermont|virginia|washington|west virginia|wisconsin|wyoming|district of columbia|puerto rico)\b/;
   let _map = null, _markerLayer = null, _lastFitKey = '';
 
@@ -2027,7 +1977,7 @@
       return;
     }
     if (!_map) {
-      _map = L.map('map', { scrollWheelZoom: true }).setView(CA_CENTER, 6);
+      _map = L.map('map', { scrollWheelZoom: true }).setView(DEFAULT_MAP_CENTER, 2);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18, attribution: '© OpenStreetMap'
       }).addTo(_map);
@@ -2043,7 +1993,7 @@
       const c = geocodeJob(j.location);
       if (!c) { remoteCount++;
         const k = 'remote';
-        if (!buckets.has(k)) buckets.set(k, { lat: CA_CENTER[0], lng: CA_CENTER[1], remote: true, jobs: [] });
+        if (!buckets.has(k)) buckets.set(k, { lat: DEFAULT_MAP_CENTER[0], lng: DEFAULT_MAP_CENTER[1], remote: true, jobs: [] });
         buckets.get(k).jobs.push(j); return;
       }
       const k = c[0] + ',' + c[1];
@@ -2061,7 +2011,7 @@
         `<div style="margin:3px 0">${j._star ? '<span style="color:#d97706">★</span> ' : ''}`
         + `<a href="${escape(j.url)}" target="_blank" rel="noopener">${escape(j.title)}</a> <span style="color:#888">· score ${rankScore(j).value}</span>`
         + `<br><span style="color:#666">${escape(j.company)}${j._salDisp ? ' · ' + escape(j._salDisp) : ''}</span></div>`).join('');
-      const where = b.remote ? 'Remote / Statewide' : escape(top[0].location || 'California');
+      const where = b.remote ? 'Remote / Statewide' : escape(top[0].location || 'Unknown location');
       const m = L.circleMarker([b.lat, b.lng], {
         radius: r, color: b.remote ? '#a78bfa' : '#34d399',
         fillColor: b.remote ? '#a78bfa' : '#34d399', fillOpacity: 0.55, weight: 1.5,
@@ -2072,7 +2022,7 @@
         { maxWidth: 320 });
     });
 
-    // Auto-fit to wherever the jobs are (CA + Oregon + Australia). Only refit
+    // Auto-fit to wherever the jobs are. Only refit
     // when the extent actually changes, so dragging the salary slider etc.
     // doesn't keep snapping the view.
     const pts = [...buckets.values()].map(b => [b.lat, b.lng]);
@@ -2081,7 +2031,7 @@
       _map.fitBounds(pts, { padding: [34, 34], maxZoom: 9 });
       _lastFitKey = key;
     } else if (!pts.length) {
-      _map.setView(CA_CENTER, 5); _lastFitKey = '';
+      _map.setView(DEFAULT_MAP_CENTER, 2); _lastFitKey = '';
     }
 
     note.hidden = false;
@@ -2199,18 +2149,14 @@
   }
 
   // ---------- Prune (keeps localStorage bounded) ----------
-  // Drops untriaged jobs that are junior/student/trainee postings (excluded at
-  // the scraper — keep this regex in sync with EXCLUDED_SENIORITY_RE in
-  // scrape_jobs.py) or older than 30 days. Anything saved/applied/dismissed
-  // is kept — that's the user's triage history.
-  const EXCLUDED_TITLE_RE = /\b(intern|interns|internship|co-?op|trainee|apprentice|technician|research assistant|lab assistant|teaching assistant|undergraduate|postdoc|postdoctoral|work-study|volunteer|fellowship|engineer|engineering|ehs|occupational safety|occupational health)\b|health\s*&\s*safety|health and safety/i;
+  // Drops untriaged jobs older than 30 days. Title and employer exclusions are
+  // configuration-driven; the dashboard has no domain-specific hard filter.
   function pruneState() {
     const cutoff = Date.now() - 30 * 86400000;
     const before = state.jobs.length;
     state.jobs = state.jobs.filter(j => {
       if (state.triage[j.url]) return true;
-      if (EXCLUDED_TITLE_RE.test(j.title || '')) return false;
-      if (isPharma(j.company)) return false;   // env-tox only — drop cached pharma
+      if (isExcludedCompany(j.company)) return false;
       const t = jobFreshMs(j);
       return t == null || t >= cutoff;
     });

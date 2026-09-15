@@ -28,9 +28,27 @@ Produce this exact shape, filled in for ME based on my CV:
     "subtitle": "<my target locations, e.g. 'Bay Area · Remote'>",
     "emoji": "<one relevant emoji>"
   },
+  "search_scope": {
+    "role_families": [ "<the role families I am targeting>" ],
+    "primary_search_terms": [ "<the complete canonical job-title list>" ],
+    "geography": {
+      "uk_primary": [ "<primary locations; [] when not applicable>" ],
+      "international_remote_discovery": [ "Remote", "Worldwide", "Global", "Anywhere", "APAC", "Asia", "China" ],
+      "remote_policy": "Remote labels are discovery signals only; eligibility must be established separately."
+    }
+  },
+  "skills": {
+    "existing_strengths": [ "<skills I already demonstrate>" ],
+    "ai_transition_strengths": [ "<skills supporting my target transition>" ],
+    "development_opportunities": [ "<skills I can grow into; never exclusions>" ]
+  },
+  "negative_domains": {
+    "mode": "deprioritize",
+    "terms": [ "<off-target role families for later ranking, not substring filtering>" ]
+  },
   "keywords": {
     "include": [ "<20-60 job-TITLE phrases that fit my field>" ],
-    "exclude": [ "<titles to drop: intern, internship, postdoc, etc., plus any roles clearly NOT for me>" ]
+    "exclude": [ "<only unequivocal title-level hard exclusions I explicitly requested>" ]
   },
   "search_terms": {
     "linkedin": [ "<15-25 queries to type into LinkedIn search>" ],
@@ -47,6 +65,9 @@ Produce this exact shape, filled in for ME based on my CV:
     "ziprecruiter": [ { "location": "<City, ST  OR  State>", "country": "USA" } ],
     "google_jobs": [ { "location": "<City, ST  OR  State>", "country": "USA" } ],
     "hiring_cafe": [ { "location": "<Country, State, or City>" } ]
+  },
+  "location_filter": {
+    "terms": [ "<location phrases accepted by post-filtered sources, including configured remote discovery labels>" ]
   },
   "google_jobs": {
     "queries": [],
@@ -74,17 +95,27 @@ Rules:
 - keywords.include: use FULL words/phrases as they appear in real titles
   ("data scientist", "machine learning engineer"), not stems. Multi-word phrases
   match as substrings. Be specific enough to avoid unrelated fields.
-- keywords.exclude: always include intern/internship/co-op/trainee; add seniority
-  or off-field terms if I asked (e.g. "junior", "manager", a competing field).
+- search_scope is the canonical, human-readable answer to what work and geography
+  I am targeting. Keep source-specific execution lists aligned with it.
+- skills.development_opportunities must never become exclusions.
+- negative_domains are later ranking/classification signals. Do not copy them
+  into keywords.exclude or implement them as description substring filters.
+- keywords.exclude: include only unequivocal hard exclusions I explicitly asked
+  for. Keep senior, skill-gap, and unclear-location roles unless directed otherwise.
 - search_terms are broader than keywords (they're what you'd type in a search box).
 - locations: convert my target places to the format shown. For LinkedIn, set
   "geoId": "" unless I gave you one — the tracker resolves the text. Use a
   separate entry per place. For Indeed/Glassdoor/ZipRecruiter/Google Jobs,
-  "country" is "USA", "Australia", "Canada", "GB", etc. HiringCafe's public
-  search route currently defaults to United States, so keep its location as
-  "United States" unless I explicitly ask otherwise.
+  "country" is "USA", "Australia", "Canada", "UK", etc. HiringCafe's public
+  search route currently defaults to United States, so leave its search terms
+  and locations empty for a non-US search rather than silently adding US roles.
+- location_filter.terms: include the country, city, region, and remote discovery
+  labels that should be retained. This is a discovery allow-list, not proof that
+  a remote role permits employment from a particular country.
 - google_jobs.queries: keep [] unless I explicitly provide exact Google Jobs
-  search-box text to use verbatim.
+  search-box text to use verbatim. Each exact query may be a string, or an object
+  containing query plus location/country locale context for API fallbacks. Locale
+  context affects where the search is executed; it is not work-eligibility proof.
 - google_jobs API credentials: keep serpapi_api_key, oxylabs_username, and
   oxylabs_password empty; these should be GitHub Actions secrets, not generated
   into config.json, unless I explicitly ask for local-only config credentials.

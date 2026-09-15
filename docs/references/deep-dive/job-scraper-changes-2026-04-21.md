@@ -1,3 +1,7 @@
+> **Historical reference.** This report records an earlier session and is not an
+> active design or implementation instruction. Use [the catalog](../../README.md)
+> for current context and [AGENTS.md](../../../AGENTS.md) for agent operating rules.
+
 # Deep Dive: Biotech MLE Job Scraper — Session Changes
 
 **Generated**: 2026-04-21  

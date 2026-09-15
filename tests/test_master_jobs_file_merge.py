@@ -1,6 +1,22 @@
 """Test _merge_into_all_jobs — master file merge with field preservation."""
 import json
+from datetime import datetime, timezone
+
+import pytest
+
 from scrape_jobs import _merge_into_all_jobs
+
+
+@pytest.fixture(autouse=True)
+def _freeze_merge_time(monkeypatch):
+    """Keep this module's merge clock at the dated fixture's reference time."""
+    class FixtureDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            reference = datetime(2026, 8, 15, 12, tzinfo=timezone.utc)
+            return reference.astimezone(tz) if tz else reference.replace(tzinfo=None)
+
+    monkeypatch.setattr("scrape_jobs.datetime", FixtureDatetime)
 
 
 def test_merge_adds_new_jobs(tmp_output_dir, sample_all_jobs):

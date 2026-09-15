@@ -7,8 +7,7 @@ runs and forks without Pushover are unaffected). It dedupes against
 notified.json so the same role is never pushed twice — across sources or runs.
 
 "Highly relevant" = a posting that either
-  • touches a priority topic (microplastics, ecotoxicology, endocrine-disrupting
-    chemicals, R/Shiny — mirrors STAR_TERMS in triage.html), or
+  • touches a priority topic configured by the user, or
   • scores >= NOTIFY_MIN_FIT (default 75) on a compact port of the dashboard's
     resume-fit model.
 
@@ -48,62 +47,12 @@ DASHBOARD_URL = (
 MAX_PUSHES_PER_RUN = 8     # cap individual pings; the rest get one summary
 NOTIFIED_KEEP = 600        # remember this many recent jobs to avoid repeats
 
-# Priority-topic stars — keep in sync with STAR_TERMS in triage.html.
-STAR_TERMS = [
-    ("microplastics", re.compile(r'microplastic|nanoplastic|microfiber', re.I)),
-    ("ecotoxicology", re.compile(r'ecotoxicolog', re.I)),
-    ("endocrine-disrupting chemicals", re.compile(r'endocrine[\s-]?disrupt|\bedcs?\b', re.I)),
-    ("R/Shiny", re.compile(r'\brshiny\b|\br[\s-]?shiny\b|shiny\s*(?:app|dashboard|server)|\bshiny\b', re.I)),
-]
-
-# Compact resume-fit. Title counts x3, but broad title-only hits are capped and
-# poor-fit role families are penalized so weekly "standouts" do not overstate
-# generic consulting/compliance matches when scores.json is empty.
-FIT_TERMS = [
-    (re.compile(r'microplastic|nanoplastic|plastic pollution', re.I), 12),
-    (re.compile(r'ecotoxicolog', re.I), 12),
-    (re.compile(r'human health risk|ecological risk|risk character', re.I), 11),
-    (re.compile(r'\brisk assess', re.I), 7),
-    (re.compile(r'\bexposure\b|exposure assess|exposure scien', re.I), 10),
-    (re.compile(r'\bqsar\b|read-across', re.I), 11),
-    (re.compile(r'\bpfas\b|perfluoro|per- and polyfluoro', re.I), 10),
-    (re.compile(r'toxicolog', re.I), 8),
-    (re.compile(r'pharmacokinetic|toxicokinetic|\bpbpk\b', re.I), 8),
-    (re.compile(r'dose.response|benchmark dose', re.I), 7),
-    (re.compile(r'computational tox|predictive tox|new approach method|\bnam\b|in vitro|high.throughput', re.I), 8),
-    (re.compile(r'emerging contaminant|\bcec\b|contaminant|pollutant', re.I), 6),
-    (re.compile(r'drinking water|water quality', re.I), 7),
-    (re.compile(r'hazard assess', re.I), 6),
-    (re.compile(r'endocrine|bioaccumulat|sediment|aquatic|marine|estuar', re.I), 5),
-    (re.compile(r'environmental health|environmental chemist|environmental scien', re.I), 4),
-    (re.compile(r'regulatory|policy|standard setting|guidance', re.I), 4),
-    (re.compile(r'data scien|machine learning|\bshiny\b|\br programming\b|biostatistic|modeling|modelling', re.I), 4),
-    (re.compile(r'cheminformatic|chemical safety|chemical risk|product steward', re.I), 5),
-]
-
-SIGNATURE_TERMS = [
-    re.compile(p, re.I) for p in [
-        r'microplastic|nanoplastic|plastic pollution|ecotoxicolog',
-        r'endocrine[\s-]?disrupt|\bedcs?\b',
-        r'\bqsar\b|read-across|structure.activity|cheminformatic',
-        r'computational tox|predictive tox|new approach method|\bnam\b',
-        r'pharmacokinetic|toxicokinetic|\bpbpk\b|dose.response|benchmark dose',
-        r'\bexposure\b|exposure assess|exposure scien',
-        r'human health risk|ecological risk|hazard assess|chemical risk',
-        r'\bshiny\b|\br programming\b|data scien|machine learning',
-    ]
-]
-
-POOR_FIT_TERMS = [
-    (re.compile(r'occupational hygiene|industrial hygien|environmental health safety|\behs\b|health safety', re.I), 36),
-    (re.compile(r'customer risk|credit risk|operations risk|operational risk|financial risk|banking|change lead', re.I), 45),
-    (re.compile(r'risk assessment and operations', re.I), 32),
-    (re.compile(r'staff research associate|research associate', re.I), 32),
-    (re.compile(r'contaminated land|remediation|field oversight|hazardous building materials|stormwater', re.I), 24),
-    (re.compile(r'\bwater treatment\b|utilities operations|electrician|air quality project', re.I), 18),
-    (re.compile(r'\bprincipal\b|practice lead|senior manager|director\b|supervisor', re.I), 14),
-    (re.compile(r'clinical|forensic|pharmacologist|physiologist|pharmaceutical|pharmaron|biocompat', re.I), 35),
-]
+# Domain-neutral fallbacks. Personal deterministic rules belong in
+# scoring_profile.json; the committed example is also intentionally empty.
+STAR_TERMS = []
+FIT_TERMS = []
+SIGNATURE_TERMS = []
+POOR_FIT_TERMS = []
 
 DEFAULT_SCORING_SETTINGS = {
     "title_multiplier": 3,
@@ -630,9 +579,9 @@ def send_test() -> bool:
     ok = send_pushover(
         token, user,
         title="🧪 Job_Scraper — test notification",
-        message=("Pushover is wired up correctly. You'll get pings like this for "
-                 "highly-relevant new roles: microplastics, ecotoxicology, "
-                 "endocrine-disrupting chemicals, R/Shiny, or a high resume-fit score."),
+        message=("Pushover is wired up correctly. Notifications will be sent "
+                 "when a new role matches your configured priority topics or "
+                 "deterministic fit threshold."),
         url=DASHBOARD_URL,
         url_title="Open dashboard",
         priority=0,

@@ -1,13 +1,11 @@
-"""Test is_target_location — all 50 US states accepted, international rejected.
+"""Regression tests for the configuration-driven discovery location filter."""
 
-This is a regression test for the confirmed bug where 35/50 states were
-missing from the location filter, causing jobs to be dropped.
-"""
 import pytest
+
+import scrape_jobs
 from scrape_jobs import is_target_location
 
 
-# All 50 US states (by full name — what LinkedIn returns)
 US_STATES = [
     "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
     "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
@@ -21,50 +19,81 @@ US_STATES = [
     "West Virginia", "Wisconsin", "Wyoming",
 ]
 
-
-# International locations that must be rejected
-INTERNATIONAL = [
-    "London, United Kingdom",
-    "Cardiff, Wales",
-    "Toronto, Canada",
-    "Sydney, Australia",
-    "Berlin, Germany",
-    "Tokyo, Japan",
-    "Mumbai, India",
-    "Paris, France",
-    "Amsterdam, Netherlands",
-    "Singapore, Singapore",
-    "Dublin, Ireland",
-    "Tel Aviv, Israel",
+DISCOVERY_TERMS = [
+    "united kingdom", "uk", "england", "scotland", "london", "birmingham",
+    "coventry", "manchester", "cambridge", "oxford", "bristol", "edinburgh",
+    "leeds", "reading", "remote", "worldwide", "global", "anywhere",
+    "apac", "asia", "china",
 ]
 
 
+@pytest.fixture(autouse=True)
+def _phase2_locations(monkeypatch):
+    monkeypatch.setattr(scrape_jobs, "TARGET_LOCATIONS", DISCOVERY_TERMS)
+
+
 @pytest.mark.parametrize("state", US_STATES)
-def test_all_50_states_accepted(state):
-    """Every US state must pass the location filter."""
-    assert is_target_location(f"City, {state}, United States") is True, (
-        f'"{state}" was rejected — location filter bug'
-    )
+def test_us_states_are_not_implicitly_accepted(state):
+    """Legacy US state names must not bypass the configured allow-list."""
+    assert is_target_location(f"City, {state}, United States") is False
 
 
-def test_remote():
-    assert is_target_location("Remote") is True
+@pytest.mark.parametrize(
+    "location",
+    [
+        "London, England, United Kingdom",
+        "Birmingham, England, United Kingdom",
+        "Coventry, UK",
+        "Greater Manchester, England",
+        "Cambridge, England",
+        "Oxford, England",
+        "Bristol, England",
+        "Edinburgh, Scotland",
+        "Leeds, England",
+        "Reading, England",
+    ],
+)
+def test_uk_primary_locations_are_accepted(location):
+    assert is_target_location(location) is True
 
 
-def test_remote_united_states():
-    assert is_target_location("Remote, United States") is True
+@pytest.mark.parametrize(
+    "location",
+    [
+        "Remote",
+        "Remote — US only",
+        "Worldwide remote",
+        "Global",
+        "Work from anywhere",
+        "Remote, APAC",
+        "Asia Pacific",
+        "Shanghai, China",
+    ],
+)
+def test_remote_discovery_signals_are_retained(location):
+    """Retention for discovery does not assert China eligibility."""
+    assert is_target_location(location) is True
 
 
-def test_hybrid():
-    assert is_target_location("Hybrid - Austin, TX") is True
+@pytest.mark.parametrize(
+    "location",
+    [
+        "Toronto, Canada",
+        "Paris, France",
+        "Berlin, Germany",
+        "Tokyo, Japan",
+        "New York, United States",
+        "Sydney, Australia",
+        "Phuket, Thailand",
+    ],
+)
+def test_non_target_onsite_locations_are_rejected(location):
+    assert is_target_location(location) is False
 
 
-@pytest.mark.parametrize("location", INTERNATIONAL)
-def test_international_rejected(location):
-    """International locations must be rejected."""
-    assert is_target_location(location) is False, (
-        f'"{location}" was accepted — should be rejected as international'
-    )
+def test_short_uk_term_uses_word_boundaries():
+    assert is_target_location("Phuket, Thailand") is False
+    assert is_target_location("Remote, UK") is True
 
 
 def test_empty():

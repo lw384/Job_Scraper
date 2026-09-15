@@ -1,0 +1,332 @@
+{
+  "_README": "Ivy / Wei personal job-discovery configuration. This file contains search preferences only; keep credentials and private CV data in secrets.",
+
+  "profile": {
+    "title": "Ivy / Wei Job Discovery",
+    "subtitle": "UK primary · international remote discovery",
+    "emoji": "🚀"
+  },
+
+  "search_scope": {
+    "_comment": "Canonical career target. Change this section first when the search direction changes, then keep the source-specific execution lists below aligned.",
+    "role_families": [
+      "AI Application / AI Engineer",
+      "Product Engineer",
+      "Full-stack",
+      "Frontend + AI",
+      "Frontend",
+      "Software Engineer",
+      "Solutions / Developer Tools",
+      "Graduate / Early Career",
+      "Other"
+    ],
+    "primary_search_terms": [
+      "AI Engineer",
+      "Applied AI Engineer",
+      "AI Application Engineer",
+      "Generative AI Engineer",
+      "GenAI Engineer",
+      "LLM Engineer",
+      "AI Product Engineer",
+      "Product Engineer",
+      "Full Stack Engineer",
+      "Full-stack Software Engineer",
+      "Frontend Engineer",
+      "Frontend Software Engineer",
+      "Software Engineer",
+      "Software Developer",
+      "Developer Tools Engineer",
+      "Developer Experience Engineer",
+      "Developer Productivity Engineer"
+    ],
+    "geography": {
+      "uk_primary": [
+        "United Kingdom",
+        "London",
+        "Birmingham",
+        "Coventry",
+        "Manchester",
+        "Cambridge",
+        "Oxford",
+        "Bristol",
+        "Edinburgh",
+        "Leeds",
+        "Reading",
+        "UK Remote"
+      ],
+      "international_remote_discovery": [
+        "Remote",
+        "Worldwide",
+        "Global",
+        "Anywhere",
+        "APAC",
+        "Asia",
+        "China"
+      ],
+      "remote_policy": "Remote is a discovery bucket only. A remote label does not imply China eligibility; retain unclear roles for later eligibility classification."
+    }
+  },
+
+  "skills": {
+    "_comment": "Signals for later deterministic ranking; none of these fields is a hard filter in Phase 2.",
+    "existing_strengths": [
+      "React",
+      "TypeScript",
+      "JavaScript",
+      "Vue",
+      "Frontend",
+      "Web Application",
+      "API",
+      "Data Visualisation",
+      "Developer Tools"
+    ],
+    "ai_transition_strengths": [
+      "Python",
+      "LLM",
+      "Generative AI",
+      "AI Agents",
+      "RAG",
+      "Machine Learning",
+      "AI API",
+      "Evaluation"
+    ],
+    "development_opportunities": [
+      "AWS",
+      "Docker",
+      "Kubernetes",
+      "FastAPI",
+      "PostgreSQL",
+      "Vector Database",
+      "LangChain",
+      "LlamaIndex",
+      "Observability",
+      "CI/CD"
+    ]
+  },
+
+  "negative_domains": {
+    "_comment": "Ranking/classification signals only. They are deliberately not copied into keywords.exclude because substring filtering would create false negatives.",
+    "mode": "deprioritize",
+    "terms": [
+      "Data Analyst",
+      "Business Analyst",
+      "Research Scientist",
+      "Quant Research",
+      "Embedded",
+      "Firmware",
+      "Hardware",
+      "IT Support",
+      "Manual QA",
+      "UX Designer"
+    ]
+  },
+
+  "keywords": {
+    "_comment": "Positive title allow-list. Broad target roles are retained for later ranking; Phase 2 has no seniority or skill-gap hard filters.",
+    "include": [
+      "AI Engineer",
+      "Applied AI Engineer",
+      "AI Application Engineer",
+      "Generative AI Engineer",
+      "GenAI Engineer",
+      "LLM Engineer",
+      "AI Product Engineer",
+      "Product Engineer",
+      "Full Stack Engineer",
+      "Full-stack Software Engineer",
+      "Frontend Engineer",
+      "Frontend Software Engineer",
+      "Software Engineer",
+      "Software Developer",
+      "Developer Tools Engineer",
+      "Developer Experience Engineer",
+      "Developer Productivity Engineer"
+    ],
+    "exclude": [],
+    "_fuzzy_comment": "Disabled in Phase 2. Exact positive title phrases provide the hard discovery boundary.",
+    "fuzzy_seniority": [],
+    "fuzzy_domain": [],
+    "fuzzy_exclude": []
+  },
+
+  "search_terms": {
+    "_comment": "Per-source query budgets. These are execution subsets of search_scope.primary_search_terms, not a second career definition.",
+    "linkedin": [
+      "AI Engineer",
+      "Applied AI Engineer",
+      "Generative AI Engineer",
+      "LLM Engineer",
+      "Product Engineer",
+      "Full Stack Engineer",
+      "Frontend Engineer",
+      "Software Engineer",
+      "Software Developer",
+      "Developer Tools Engineer",
+      "Developer Experience Engineer"
+    ],
+    "indeed": [
+      "AI Engineer",
+      "LLM Engineer",
+      "Product Engineer",
+      "Full Stack Engineer",
+      "Frontend Engineer",
+      "Software Engineer",
+      "Software Developer",
+      "Developer Tools Engineer"
+    ],
+    "glassdoor": [
+      "AI Engineer",
+      "LLM Engineer",
+      "Product Engineer",
+      "Full Stack Engineer",
+      "Frontend Engineer",
+      "Software Engineer",
+      "Software Developer",
+      "Developer Tools Engineer"
+    ],
+    "ziprecruiter": [],
+    "google_jobs": [],
+    "hiring_cafe": [],
+    "calcareers": [],
+    "usajobs": [],
+    "governmentjobs": [],
+    "workday": []
+  },
+
+  "locations": {
+    "_comment": "Scheduled query locations are intentionally bounded. The complete desired geography is recorded under search_scope.geography.",
+    "linkedin": [
+      {
+        "name": "United Kingdom",
+        "location": "United Kingdom",
+        "geoId": "101165590"
+      },
+      {
+        "name": "International Remote",
+        "location": "Remote",
+        "geoId": ""
+      }
+    ],
+    "indeed": [
+      { "location": "United Kingdom", "country": "UK" },
+      { "location": "London", "country": "UK" },
+      { "location": "Birmingham", "country": "UK" },
+      { "location": "Manchester", "country": "UK" },
+      { "location": "Edinburgh", "country": "UK" }
+    ],
+    "glassdoor": [
+      { "location": "United Kingdom", "country": "UK" },
+      { "location": "London", "country": "UK" }
+    ],
+    "ziprecruiter": [],
+    "google_jobs": [],
+    "hiring_cafe": [],
+    "_linkedin_partitions_comment": "Not enabled in Phase 2; the previous US-state partition matrix is not part of this search scope.",
+    "linkedin_partitions": {
+      "states": [],
+      "high_volume": {
+        "locations": [],
+        "day_slices": true
+      }
+    }
+  },
+
+  "location_filter": {
+    "_comment": "Basic discovery allow-list only. Remote entries are retained even when regional eligibility is unclear.",
+    "terms": [
+      "United Kingdom",
+      "UK",
+      "England",
+      "Scotland",
+      "London",
+      "Birmingham",
+      "Coventry",
+      "Manchester",
+      "Cambridge",
+      "Oxford",
+      "Bristol",
+      "Edinburgh",
+      "Leeds",
+      "Reading",
+      "Remote",
+      "Worldwide",
+      "Global",
+      "Anywhere",
+      "APAC",
+      "Asia",
+      "China"
+    ]
+  },
+
+  "google_jobs": {
+    "_comment": "Paired queries cover UK-primary and international-remote discovery without a terms-by-locations Cartesian product. Location/country provide locale context to API fallbacks; they do not assert work eligibility.",
+    "queries": [
+      { "query": "AI Engineer jobs in the United Kingdom", "location": "United Kingdom", "country": "UK" },
+      { "query": "LLM Engineer jobs in the United Kingdom", "location": "United Kingdom", "country": "UK" },
+      { "query": "Product Engineer jobs in the United Kingdom", "location": "United Kingdom", "country": "UK" },
+      { "query": "Full Stack Engineer jobs in the United Kingdom", "location": "United Kingdom", "country": "UK" },
+      { "query": "Frontend Engineer jobs in the United Kingdom", "location": "United Kingdom", "country": "UK" },
+      { "query": "Software Engineer jobs in the United Kingdom", "location": "United Kingdom", "country": "UK" },
+      { "query": "Software Developer jobs in the United Kingdom", "location": "United Kingdom", "country": "UK" },
+      { "query": "Developer Tools Engineer jobs in the United Kingdom", "location": "United Kingdom", "country": "UK" },
+      { "query": "remote AI Engineer jobs worldwide", "location": "United Kingdom", "country": "UK" },
+      { "query": "remote LLM Engineer jobs global", "location": "United Kingdom", "country": "UK" },
+      { "query": "remote Product Engineer jobs anywhere", "location": "United Kingdom", "country": "UK" },
+      { "query": "remote Full Stack Engineer jobs APAC", "location": "China", "country": "China" },
+      { "query": "remote Frontend Engineer jobs Asia", "location": "China", "country": "China" },
+      { "query": "remote Software Engineer jobs China", "location": "China", "country": "China" }
+    ],
+    "serpapi_api_key": "",
+    "oxylabs_username": "",
+    "oxylabs_password": ""
+  },
+
+  "jobspy": {
+    "proxies": [],
+    "user_agent": ""
+  },
+
+  "hiring_cafe": {
+    "_comment": "Disabled for this scope because the current scraper uses HiringCafe's US SEO route.",
+    "max_pages": 3
+  },
+
+  "csucareers": {
+    "max_pages": 30
+  },
+
+  "employers": {
+    "priority": [],
+    "exclude": []
+  },
+
+  "priority_topics": {
+    "terms": [
+      ["Frontend strengths", "\\b(?:react|typescript|javascript|vue)\\b"],
+      ["Applied AI", "\\b(?:llm|generative ai|genai|ai agents?|rag)\\b"],
+      ["Developer tools", "\\bdeveloper (?:tools?|experience|productivity)\\b"]
+    ]
+  },
+
+  "role_categories": {
+    "_comment": "Dashboard-only title buckets in Phase 2. Other is added automatically; canonical job enrichment starts in Phase 3.",
+    "terms": [
+      ["AI Application / AI Engineer", "\\b(?:ai|applied ai|ai application|generative ai|genai|llm|ai product) engineer\\b|\\bsoftware engineer\\b.*\\b(?:generative ai|genai|llm)\\b"],
+      ["Frontend + AI", "(?=.*\\bfront[ -]?end\\b)(?=.*\\b(?:ai|llm|generative ai|genai)\\b)"],
+      ["Product Engineer", "\\bproduct engineer\\b"],
+      ["Full-stack", "\\bfull[ -]?stack(?: software)? engineer\\b"],
+      ["Frontend", "\\bfront[ -]?end(?: software)? engineer\\b"],
+      ["Solutions / Developer Tools", "\\b(?:solutions?|developer tools?|developer experience|developer productivity) engineer\\b"],
+      ["Graduate / Early Career", "\\b(?:graduate|new grad|early career|junior|entry level) (?:software |frontend |front-end |full[ -]?stack |product |ai )?(?:engineer|developer)\\b"],
+      ["Software Engineer", "\\bsoftware (?:engineer|developer)\\b"]
+    ]
+  },
+
+  "notify": {
+    "min_fit": 75,
+    "weekly_digest": {
+      "enabled": false,
+      "days": 7
+    }
+  }
+}

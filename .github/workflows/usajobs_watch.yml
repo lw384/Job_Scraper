@@ -1,10 +1,7 @@
 name: USAJOBS Watcher
 
 on:
-  # Daily — federal postings change at day resolution. Runs at 15:37 UTC
-  # (~8am PT), offset from the other watchers, plus on demand.
-  schedule:
-    - cron: "37 15 * * *"
+  # Legacy US-specific source: retained for optional manual use only.
   workflow_dispatch:
 
 concurrency:

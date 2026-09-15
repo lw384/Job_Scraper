@@ -92,7 +92,7 @@ jobs:
             echo "✓  ANTHROPIC_API_KEY: configured"
           else
             echo "   ANTHROPIC_API_KEY: not set"
-            echo "   (optional — without this, triage.yml should stay disabled)"
+            echo "   (optional — needed only for manual legacy AI triage)"
           fi
 
           if [ -n "$CANDIDATE_PROFILE" ]; then

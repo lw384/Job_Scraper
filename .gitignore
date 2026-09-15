@@ -1,5 +1,6 @@
 .DS_Store
 __pycache__/
+.venv/
 
 # Personal data — NEVER commit (public repo). CI gets these via Actions secrets.
 candidate_profile.md
@@ -8,9 +9,8 @@ resume.txt
 shortlist.*
 
 # ── Fork-owner customization ──────────────────────────────────────────────────
-# Upstream never commits these so pulling upstream never creates merge conflicts.
-# Fork owners: copy from *.example.json, customize, then commit to YOUR fork.
-config.json
+# This personal fork tracks config.json so GitHub Actions and Pages can read it.
+# Keep credentials out of it; API keys and private CV data belong in secrets.
 scoring_profile.json
 
 # ── Scraped results & CI-generated data (unique per fork) ─────────────────────

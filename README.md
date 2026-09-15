@@ -1,12 +1,16 @@
-# 🧪 Job Scraper + Triage Dashboard
+# 🔎 Job Scraper + Triage Dashboard
 
-GitHub Actions pipelines that scrape job boards (LinkedIn, Indeed, Glassdoor, ZipRecruiter, Google Jobs, HiringCafe, USAJOBS, NEOGOV, CalOpps, CalCareers, CSU Careers) on a schedule, commit the results to the repo, and surface them in a single filterable [`triage.html`](#interactive-triage-dashboard--triagehtml) dashboard hosted **free** on GitHub Pages — with a map, salary harmonization, cross-source de-duplication, notes, bulk workflow states, CSV export, application-packet prompts, and optional phone notifications. **No server, no paid services, and no API keys required.**
+> **Documentation navigation:** use [the catalog](docs/README.md). Personal-config
+> references to Phase 2 below use earlier customization numbering; current Job
+> Search OS phases are defined by [ROADMAP.md](docs/ROADMAP.md).
+
+GitHub Actions pipelines that scrape general job boards on a schedule, commit the results to the repo, and surface them in a single filterable [`triage.html`](#interactive-triage-dashboard--triagehtml) dashboard hosted **free** on GitHub Pages — with a map, salary harmonization, cross-source de-duplication, notes, bulk workflow states, CSV export, application-packet prompts, and optional phone notifications. Legacy US-specific sources remain available for manual dispatch. **No server, no paid services, and no API keys required.**
 
 **Everything you search for lives in one file: [`config.json`](config.json)** — point it at your field and locations (or generate it from your CV with an LLM) and you have your own tracker. Live example: [scottcoff.in/Job_Scraper/triage.html](https://scottcoff.in/Job_Scraper/triage.html).
 
 ![The triage dashboard in action — filtering, salary distribution, map, and triage](docs/triage.gif)
 
-> This repo ships configured for **environmental / toxicology** roles (Dr. Scott Coffin's field — [scottcoff.in](https://scottcoff.in)) as a worked example, and began as [Ernesto Diaz](https://github.com/ernestod1998)'s Bay Area ML-engineer scraper. The walkthrough below sets up your own copy from scratch.
+> The committed configuration template is deliberately domain-neutral and performs no searches until you create `config.json`. The project began as a Bay Area ML-engineer scraper and was later extended into a configurable multi-source tracker.
 
 ------------------------------------------------------------------------
 # Contributions welcome!
@@ -28,13 +32,13 @@ You only need a free [**GitHub account**](https://github.com/signup). Everything
 
 Click **Fork** at the top of this page.
 
-Your personal config (`config.json`, `scoring_profile.json`) and all scraped data (`output/`) are gitignored in this upstream repo, so syncing will **never** overwrite your customizations.
+This personalized fork tracks `config.json` so GitHub Actions and GitHub Pages can read the search scope after checkout. It contains preferences only: keep API keys, CV text, and other private material in GitHub Secrets. `scoring_profile.json` and scraped data (`output/`) remain ignored locally; the protected upstream-sync workflow preserves fork-owned files.
 
 ### Staying up to date
 
-Enable the **`sync_upstream.yml`** workflow in your repo (**Actions → Sync from upstream → Enable workflow**) and it rebases new code improvements every Monday.
+Enable the **`sync_upstream.yml`** workflow in your repo (**Actions → Sync from upstream → Enable workflow**) and it merges new code improvements every Monday.
 
-> **Use the workflow, not the GitHub "Sync fork" button.** Because your fork has commits upstream doesn't (your `config.json`, your scraped data), GitHub's built-in button shows "Discard N commits" — which would delete your config. The `sync_upstream.yml` workflow handles this correctly by rebasing your commits on top of upstream. The button is safe only before you've committed any personalization.
+> **Use the workflow, not the GitHub "Sync fork" button.** Because your fork has commits upstream doesn't (your `config.json`, your scraped data), GitHub's built-in button shows "Discard N commits" — which would delete your config. The `sync_upstream.yml` workflow handles this with a protected merge. The button is safe only before you've committed any personalization.
 
 > Always pull from `https://github.com/ScottCoffin/Job_Scraper` — never from someone else's personal fork.
 
@@ -52,15 +56,15 @@ You don't need to clone just to configure it — you can edit `config.json` dire
 
 ## Step 2 — Set what you search for (`config.json`)
 
-This is the only file you need to change. Pick one:
+This is the main file to change when the career direction moves. This repository already contains the Ivy / Wei Phase 2 search scope; fork owners can replace it with their own configuration.
 
-**First:** create `config.json` in your repo. On GitHub: click **Add file → Create new file**, name it `config.json`, then copy the contents of [`config.example.json`](config.example.json) in, edit, and commit. **Do not delete or rename `config.example.json`** — keeping it lets the sync workflow pull upstream improvements to the example without conflict.
+**Starting from the template:** copy [`config.example.json`](config.example.json) to `config.json`, edit it, and commit it so scheduled workflows and the dashboard see the same settings. **Do not delete or rename `config.example.json`** — it remains the neutral schema/template.
 
 **A. Generate it from your CV (no coding).** Open [`docs/cv-to-config-prompt.md`](docs/cv-to-config-prompt.md), copy the prompt, and paste it into [**ChatGPT**](https://chat.openai.com), [**Claude**](https://claude.ai), or any chatbot together with your CV and your target locations. It returns a finished `config.json` ready to commit.
 
-**B. Edit by hand.** `config.example.json` is fully self-documenting. The two things almost everyone change: `keywords.include` + `search_terms` (what roles) and `locations` (where; LinkedIn `geoId` can be left `""`).
+**B. Edit by hand.** Start with `search_scope` (the canonical role and geography statement), then align `keywords.include`, `search_terms`, and `locations` (the source execution settings; LinkedIn `geoId` can be left `""`).
 
-Optional knobs: `profile` (dashboard title/subtitle), `keywords.exclude`, `employers.priority` / `employers.exclude`, `priority_topics` (⭐ highlights), `role_categories` (the Role-filter buckets), and per-source `search_terms` / `locations`.
+Supporting sections record `skills` and `negative_domains`. Development opportunities and negative domains are metadata for later deterministic ranking; they are not substring hard filters in Phase 2. Optional runtime knobs include `profile`, `employers`, `priority_topics`, `role_categories`, and per-source `search_terms` / `locations`.
 
 ## Step 3 — Host the dashboard (GitHub Pages)
 
@@ -87,7 +91,7 @@ Want it on a custom domain (like `you.com/jobs`)? See [Managing a custom domain]
 
 ## Step 5 — Run it the first time
 
-In the **Actions** tab, open each watcher and click **Run workflow**. Afterwards they run automatically on their schedule — this first manual run seeds your dataset.
+In the **Actions** tab, open the active general-board watchers and click **Run workflow**. Afterwards they run automatically on their schedule — this first manual run seeds your dataset. Priority-employer and US-specific watchers are retained for manual use only.
 
 **One-time historical backfill (recommended for new setups):**
 
@@ -101,12 +105,12 @@ Several watchers have a `backfill` toggle in the "Run workflow" dialog that pull
 | **ZipRecruiter Watcher** | last 24 hours | last 30 days |
 | **Google Jobs Watcher** | last 24 hours | last 30 days |
 | **HiringCafe Watcher** | last 30 days | last 61 days |
-| **Priority Employer Digest** | last 24 hours | last 30 days |
-| **Local & State Gov Watcher (NEOGOV)** | last 21 days | last 60 days |
+| **Priority Employer Digest** *(legacy/manual)* | last 24 hours | last 30 days |
+| **Local & State Gov Watcher (NEOGOV)** *(legacy/manual)* | last 21 days | last 60 days |
 
 To use: **Actions → [Watcher name] → Run workflow → check "One-time backfill" → Run workflow**.
 
-**No backfill needed** for **CalCareers**, **USAJOBS**, and **CalOpps** — these sources return all current open listings on every run, so a single normal run is already a full snapshot.
+**No backfill needed** for the manual-only **CalCareers**, **USAJOBS**, and **CalOpps** sources — these return all current open listings on every run.
 
 Give it 1–2 minutes per watcher, then open your `…/triage.html` URL. 🎉 Hard-refresh (ctrl+R) after each scrape to see new jobs.
 
@@ -125,7 +129,7 @@ Without these secrets, notifications are simply off and everything else works.
 
 ## Step 7 — AI résumé fit-scoring (optional, advanced)
 
-`triage_agent.py` can score each role against your résumé with the [**Claude API**](https://www.anthropic.com/api) (paid, \~pennies/run). It needs an `ANTHROPIC_API_KEY` secret plus your profile/résumé in secrets. Entirely optional — leave the `triage.yml` / `evals.yml` workflows **disabled** if you don't use it (**Actions → workflow → ⋯ → Disable**).
+`triage_agent.py` can score each role against your résumé with the [**Claude API**](https://www.anthropic.com/api) (paid, \~pennies/run). It needs an `ANTHROPIC_API_KEY` secret plus your profile/résumé in secrets. The `triage.yml` and `evals.yml` workflows are retained as manual-only legacy tools and are not part of the default production schedule.
 
 ### Turning sources on / off
 
@@ -133,7 +137,7 @@ Each source is a workflow in [`.github/workflows/`](.github/workflows). To stop 
 
 Glassdoor is currently treated as an opt-in scheduled source because it is prone to upstream blocking and location-parse failures from shared GitHub Actions IPs. Manual **Run workflow** still works for testing. To schedule it, add repository Variable `ENABLE_GLASSDOOR_WATCHER=true`.
 
-### Running locally {#running-locally}
+### Running locally
 
 Optional — only if you want to test scrapes on your own machine. Needs [**Python 3.11+**](https://www.python.org/downloads/):
 
@@ -153,19 +157,19 @@ The dashboard must be served over HTTP (the commands above) — opening `triage.
 
 ------------------------------------------------------------------------
 
-> **The rest of this README documents how it works**, using the shipped environmental / toxicology example. Skim it to customize further; you don't need any of it to get running.
+> **The rest of this README documents how it works.** All role, location, employer, and topic choices come from your personal `config.json`.
 
 ## What It Does
 
-> The descriptions below use this repo's shipped example config (environmental / toxicology; California, Oregon & Australia). **Your locations, keywords, and employers come from [`config.json`](config.json)** — see the [walkthrough above](#set-up-your-own-full-walkthrough-).
+> **Your locations, keywords, and employers come from [`config.json`](config.json)** — the committed example is an inactive, domain-neutral template.
 
-### 1. Priority-employer digest — daily, last 24h
+### 1. Priority-employer digest — manual legacy source, last 24h
 
 Hits LinkedIn's public guest endpoint for roles in your configured locations posted in the last 24 hours, then post-filters to a **priority-employer allowlist** (`employers.priority` in `config.json`). Treat the shipped employer list as an example only: replace it with the companies, agencies, universities, nonprofits, labs, hospitals, startups, studios, or other organizations that matter in your own field. Add to that list to expand coverage.
 
 Output goes to `jobs.json`, `jobs.md`, and `jobs.html`. Each run dedupes against the previously-committed `jobs.json`, so the output surfaces only postings new since the last run.
 
-> A direct-ATS probe path (`CURATED_BIOTECHS`) also exists but is **empty by default** in the shipped example. It is useful only when your target employers expose job data through supported public ATS endpoints. The LinkedIn + JobSpy-backed keyword watchers (Indeed, Glassdoor, ZipRecruiter, and Google Jobs) are the primary sources for most users.
+> A direct-ATS probe path also exists but is empty by default. It is useful only when target employers expose job data through supported public ATS endpoints. LinkedIn and the JobSpy-backed keyword watchers are the primary sources for most users.
 
 ### 2. LinkedIn watcher — hourly, last 1h
 
@@ -191,7 +195,7 @@ Uses [`python-jobspy`](https://pypi.org/project/python-jobspy/) for ZipRecruiter
 
 ### 6. Google Jobs watcher — hourly, last 24h
 
-Uses JobSpy's Google Jobs adapter first, which keeps this repo free of paid proxy APIs and browser automation when Google still serves parseable job payloads. Google is different from the other JobSpy boards: the scraper builds full `google_search_term` strings such as `toxicologist jobs near California since yesterday`, because Google Jobs ignores JobSpy's generic `search_term`, `location`, and `hours_old` parameters. Configure with `search_terms.google_jobs` and `locations.google_jobs`, or set exact strings in `google_jobs.queries`.
+Uses JobSpy's Google Jobs adapter first, which keeps this repo free of paid proxy APIs and browser automation when Google still serves parseable job payloads. Google is different from the other JobSpy boards: the scraper builds full `google_search_term` strings such as `<role> jobs near <location> since yesterday`, because Google Jobs ignores JobSpy's generic `search_term`, `location`, and `hours_old` parameters. Configure with `search_terms.google_jobs` and `locations.google_jobs`, or set exact strings in `google_jobs.queries`.
 
 If JobSpy returns zero raw rows across every query, the watcher can fall back to structured Google Jobs APIs. Add either `SERPAPI_API_KEY` or both `OXYLABS_USERNAME` and `OXYLABS_PASSWORD` as GitHub Actions secrets. The Oxylabs fallback follows their Google Jobs API pattern: `q`, `ibp=htl;jobs`, `hl`, and `gl` in the Google URL plus rendered parsing instructions. Output goes to `google_jobs.json`, `google_jobs.md`, and `google_jobs.html`, deduped against the previous run. Runs at :37 PT.
 
@@ -201,25 +205,25 @@ Searches HiringCafe's public SSR `/jobs/<query>` pages for direct-from-employer 
 
 ## Keywords Matched
 
-A title is included if it matches the include terms generated from [`config.json`](config.json). Multi-word phrases match as substrings; single tokens are word-bounded, so list full words. The shipped example uses environmental/toxicology terms like these; replace them with terms for your own domain:
+A title is included if it matches the include terms from [`config.json`](config.json). Multi-word phrases match as substrings; single tokens are word-bounded, so list full words. The committed template leaves these lists empty; examples of possible terms include:
 
-**Domain/core role examples:** `toxicologist`, `software engineer`, `product manager`, `grant writer`, `clinical research coordinator`
+**Domain/core role examples:** `software engineer`, `product manager`, `grant writer`, `clinical research coordinator`
 
 **Methods or specialty examples:** `risk assess`, `machine learning`, `regulatory affairs`, `clinical trials`, `financial modeling`, `curriculum design`
 
 **Tools, products, or regulated-area examples:** `R Shiny`, `Salesforce`, `Good Clinical Practice`, `NEPA`, `SAP`, `Kubernetes`, `Adobe Creative Suite`
 
-**Topic examples:** `microplastic`, `PFAS`, `cybersecurity`, `housing policy`, `oncology`, `renewable energy`, `early childhood education`
+**Topic examples:** `cybersecurity`, `housing policy`, `oncology`, `renewable energy`, `early childhood education`
 
 **Seniority or work-style examples:** `senior`, `principal`, `director`, `remote`, `hybrid`, `field`, `research`, `policy`
 
-The list is deliberately **tight** for precision: generic titles (`research scientist`, `senior scientist`, `data scientist`, `professor`, `regulatory affairs`) are usually too broad on their own. Pair broad words with your domain, method, tool, or organization context, for example `environmental data scientist`, `healthcare data scientist`, or `assistant professor of environmental health`.
+Keep the list **tight** for precision: generic titles (`research scientist`, `senior scientist`, `data scientist`, `professor`, `regulatory affairs`) are usually too broad on their own. Pair broad words with your domain, method, tool, or organization context, for example `healthcare data scientist`, `fraud data scientist`, or `assistant professor of computer science`.
 
-**Excluded everywhere:** - **Junior / training:** `intern`, `internship`, `co-op`, `trainee`, `apprentice`, `technician`, `research/lab/teaching assistant`, `undergraduate`, `postdoc`, `work-study`, `volunteer`, `fellowship`. Keep or remove these based on the user's target career stage. - **Adjacent-but-wrong families:** add terms that are common false positives in your domain. In the shipped example, EHS/workplace-safety terms are excluded because they are adjacent to, but different from, the target environmental toxicology roles. In another domain this might be sales, customer support, bench research, finance, management-only roles, or another nearby category.
+**Exclusions are optional:** only add titles that are clearly unsuitable. Keep skill gaps, senior roles, uncertain locations, and adjacent roles for later ranking rather than hard-filtering them here.
 
 ## Geographic Scope
 
-**You define the locations** in [`config.json`](config.json) → `locations` (no code edits). The shipped example searches California, Portland & Bend OR, and Australia, but it works for anywhere — add/remove entries to suit:
+**You define the locations** in [`config.json`](config.json) → `locations` (no code edits). The domain-neutral template leaves them empty, so add only the regions you want to search:
 
 -   **LinkedIn** — `locations.linkedin`: each is a `location` + LinkedIn `geoId`. Leave `geoId` blank to let LinkedIn resolve the text (works for most cities/metros), or fill in the numeric id for tighter filtering. A geoId reference table is in [`docs/cv-to-config-prompt.md`](docs/cv-to-config-prompt.md).
 -   **Indeed / Glassdoor / ZipRecruiter** — each takes a `location` + `country` (`USA`, `Australia`, `GB`, `Canada`, …). Glassdoor falls back to Indeed locations if omitted; ZipRecruiter defaults to the US Indeed locations.
@@ -249,15 +253,15 @@ The list is deliberately **tight** for precision: generic titles (`research scie
 
 ### CalCareers (California state jobs)
 
-`scrape_jobs.py --calcareers-only` scrapes [calcareers.ca.gov](https://calcareers.ca.gov) — the CA state civil-service portal. This is useful when your configured role terms overlap with California state classifications. CalCareers is an ASP.NET WebForms site with **no public API**, so the scraper seeds a session and fires the search postback (`__EVENTTARGET=ctl00$cphMainContent$btnSearch` with the keyword field), then parses the labeled result cards. The working postback method was adapted from the [OpenPostings](https://github.com/Masterjx9/OpenPostings) `calcareers` module. Fully guarded; runs daily via `calcareers_watch.yml`. Verified against the shipped example configuration.
+`scrape_jobs.py --calcareers-only` scrapes [calcareers.ca.gov](https://calcareers.ca.gov) — the CA state civil-service portal. CalCareers is an ASP.NET WebForms site with **no public API**, so the scraper seeds a session and fires the search postback (`__EVENTTARGET=ctl00$cphMainContent$btnSearch` with the keyword field), then parses the labeled result cards. The implementation is retained for manual use through `calcareers_watch.yml`.
 
 ### CSU Careers (California State University jobs)
 
-`scrape_jobs.py --csucareers-only` scrapes [csucareers.calstate.edu](https://csucareers.calstate.edu/en-us/listing/) — the California State University systemwide PageUp listing. It walks the paginated listing table, keeps roles whose title or summary matches your configured keywords, and preserves the previous CSU output if the remote listing scan is incomplete. Runs daily via `csucareers_watch.yml`.
+`scrape_jobs.py --csucareers-only` scrapes [csucareers.calstate.edu](https://csucareers.calstate.edu/en-us/listing/) — the California State University systemwide PageUp listing. It walks the paginated listing table, keeps roles whose title or summary matches your configured keywords, and preserves the previous CSU output if the remote listing scan is incomplete. The workflow is manual-only.
 
 ### USAJOBS (federal jobs)
 
-`scrape_jobs.py --usajobs-only` scrapes [usajobs.gov](https://www.usajobs.gov) — US federal roles matching your configured keywords, **with salary**. It uses the site's public search endpoint (`/Search/ExecuteSearch`), so **no API key is required**: it seeds a session, then POSTs each keyword and keeps titles that pass your configured filter. Runs daily via `usajobs_watch.yml`. Federal roles are nationwide; use the dashboard's location filter/map to focus.
+`scrape_jobs.py --usajobs-only` scrapes [usajobs.gov](https://www.usajobs.gov) — US federal roles matching your configured keywords, **with salary**. It uses the site's public search endpoint (`/Search/ExecuteSearch`), so **no API key is required**. The workflow is retained for manual use only.
 
 > Source identified from the [OpenPostings](https://github.com/Masterjx9/OpenPostings) project's catalog of 80+ ATS providers. OpenPostings is a self-hosted aggregator (not a hosted API), so rather than depend on it we query the official USAJOBS public endpoint directly.
 
@@ -268,15 +272,15 @@ Also added from the OpenPostings catalog — the boards that carry county/city r
 -   **`--governmentjobs-only`** ([governmentjobs.com](https://www.governmentjobs.com) / NEOGOV) — state & local agencies nationwide; keyword-searched and filtered to your configured locations.
 -   **`--calopps-only`** ([calopps.org](https://www.calopps.org)) — California local agencies (cities, counties, special & water districts). CA-only board, so it is title-filtered only.
 
-Both are HTML scrapes (no API), fully guarded, and run daily via `localgov_watch.yml`. Local-government roles can be sparse, so yield is often low but high-signal when your target domain appears on public-sector boards.
+Both are HTML scrapes (no API), fully guarded, and retained for manual use via `localgov_watch.yml`.
 
 ### Dashboard features
 
 The `triage.html` cockpit adds, on top of the source/role/seniority/date filters:
 
--   **★ Priority topics** — roles touching your configured signature topics get a gold ★ and a highlighted card; a toggle filters to just those. The shipped example uses microplastics, ecotoxicology, endocrine-disrupting chemicals, and R/Shiny. Edit `priority_topics` in `config.json` and the matching dashboard terms to change what's flagged.
+-   **★ Priority topics** — roles touching signature topics from your configuration get a gold ★ and a highlighted card; the domain-neutral default has none.
 -   **Cross-source de-dup** — the same role cross-posted to LinkedIn, Indeed, Glassdoor, ZipRecruiter, Google Jobs, HiringCafe, and public-sector boards collapses into one card using normalized job IDs first, then conservative title + company + location/content checks. Triage applies to all copies at once.
--   **★ Best fit** view — ranks roles by match to the target user's specializations. The shipped example uses environmental/toxicology criteria, but you should replace those weights with criteria for your own domain. Weights live in `FIT_TERMS` in `triage.html`; every card shows a 0–100 fit chip.
+-   **★ Best fit** view — ranks roles using `scoring_profile.json` when configured. The domain-neutral fallback score is zero.
 -   **🚫 Not relevant** button — hides a role *and* learns from it: titles sharing distinctive words with your "not relevant" marks are down-ranked in Best fit.
 -   **Bulk triage + notes** — select multiple visible roles, then mark them saved, applied, interview, offer, dismissed, or not relevant in one action. Each card also has a local note field for follow-up details, contacts, or deadlines.
 -   **Company blocking** — hide a noisy employer from this browser without editing config; the block list is stored locally with your triage state.
@@ -309,7 +313,7 @@ Opening from `file://` won't work — the dashboard needs same-origin HTTP to `f
 From the **Actions** tab → *Run workflow* on any watcher, or locally:
 
 ``` bash
-python scrape_jobs.py --biotech-only         # priority-employer digest (allowlist)
+python scrape_jobs.py --priority-only        # priority-employer digest (legacy/manual)
 python scrape_jobs.py --linkedin-only        # general LinkedIn, last 1h
 python scrape_jobs.py --indeed-only          # general Indeed, last 24h
 python scrape_jobs.py --glassdoor-only       # general Glassdoor, last 24h
@@ -329,7 +333,7 @@ The LinkedIn / priority / HiringCafe / USAJOBS / gov pipelines use only the **Py
 
 > Quick setup is in the [walkthrough Step 6](#step-6--phone-notifications-optional); this is the detail.
 
-Get a push to your phone the moment a **highly-relevant** new role appears. After each scrape, `notify.py` pushes any new posting that either touches a priority topic from your configuration or scores ≥ `NOTIFY_MIN_FIT` (default 75) on the resume-fit model. It dedupes against `notified.json`, so the same role is never pushed twice (across sources or runs). Priority-topic hits ping at high priority. The shipped example's priority topics are environmental/toxicology-specific placeholders; replace them with the topics that signal an unusually good match in your domain.
+Get a push to your phone when a new role touches a configured priority topic or scores ≥ `NOTIFY_MIN_FIT` (default 75) under your deterministic scoring profile. The domain-neutral defaults do not mark any job as highly relevant.
 
 To enable, add these in **Settings → Secrets and variables → Actions**:
 
@@ -454,7 +458,7 @@ Output format:
 
 **Test it** (sends one push to your phone): - **From GitHub (recommended):** Actions → **Test Pushover Notification** → *Run workflow*. Uses your Actions secrets, so it confirms the real setup. The run log prints whether the keys are set and the exact Pushover API response on failure (e.g. a bad token/user key). - **Weekly digest dry run:** `python notify.py --weekly-digest --dry-run` - **Locally:** `bash   PUSHOVER_TOKEN=xxx PUSHOVER_USER=yyy python notify.py --test`
 
-### Optional: nightly fit-scoring agent (`triage.yml`)
+### Optional: manual legacy fit-scoring agent (`triage.yml`)
 
 `triage_agent.py` scores each new role against your profile with the Claude API. It is **optional** and needs three repo secrets (**Settings → Secrets and variables → Actions**):
 
@@ -464,7 +468,7 @@ Output format:
 | `CANDIDATE_PROFILE` | Short profile text (your background/targets — kept out of the public repo) |
 | `CANDIDATE_RESUME` | Resume / CV text (kept out of the public repo) |
 
-Paste your CV text into `CANDIDATE_RESUME`. Without these secrets, leave `triage.yml` and `evals.yml` disabled (Actions → ⋯ → Disable workflow) — the scrapers and dashboard work fully without them; `scores.json` is optional.
+Paste your CV text into `CANDIDATE_RESUME` only when manually running the legacy AI path. `triage.yml` and `evals.yml` have no automatic triggers; the scrapers and dashboard work without them and `scores.json` is optional.
 
 > Note: `eval_triage.py` still contains the original ML-candidate golden cases. They only matter if you run the triage agent; rewrite them for your domain (or keep `evals.yml` disabled) once you've finalized your profile.
 
@@ -473,12 +477,12 @@ Paste your CV text into `CANDIDATE_RESUME`. Without these secrets, leave `triage
 ```
 ├── config.example.json             # ⭐ Template config — copy to config.json and edit
 ├── scoring_profile.example.json    # Template scoring profile — copy to scoring_profile.json
-├── config.json                     # YOUR settings (gitignored; not committed upstream)
+├── config.json                     # Ivy / Wei search scope (tracked; contains no secrets)
 ├── scoring_profile.json            # YOUR scoring weights (gitignored; not committed upstream)
 ├── triage.html                     # Interactive dashboard (served by GitHub Pages)
 ├── scrape_jobs.py                  # All scraping logic (reads config.json)
 ├── notify.py                       # Pushover notifications (optional)
-├── triage_agent.py                 # Optional nightly fit-scoring agent (Claude API)
+├── triage_agent.py                 # Optional manual legacy fit-scoring agent (Claude API)
 ├── eval_triage.py                  # Golden-case evals for the triage agent
 ├── requirements.txt                # python-jobspy (Indeed, Glassdoor, ZipRecruiter, Google Jobs)
 ├── output/                         # Scraped data — gitignored upstream, populated by your CI
@@ -498,28 +502,40 @@ Paste your CV text into `CANDIDATE_RESUME`. Without these secrets, leave `triage
 │   ├── notified.json               # Push-notification dedup log
 │   └── workflow_runs.jsonl         # CI run audit log
 ├── docs/
+│   ├── README.md                   # Governing documentation catalog
 │   ├── cv-to-config-prompt.md      # LLM prompt to generate config.json from a CV
+│   ├── references/                 # Historical audits, requirements, phases, and deep dives
 │   └── triage.gif                  # Dashboard demo
 └── .github/workflows/
-    ├── scrape_jobs.yml             # Daily — priority-employer digest
+    ├── scrape_jobs.yml             # Manual-only — legacy priority-employer digest
     ├── linkedin_watch.yml          # Hourly :17 PT — general LinkedIn (last 1h)
     ├── indeed_watch.yml            # Hourly :47 PT — Indeed (last 24h)
     ├── glassdoor_watch.yml         # Hourly :07 PT — Glassdoor (last 24h)
     ├── ziprecruiter_watch.yml      # Hourly :27 PT — ZipRecruiter (last 24h)
     ├── google_jobs_watch.yml       # Hourly :37 PT — Google Jobs (last 24h)
     ├── hiringcafe_watch.yml        # Hourly :57 PT — HiringCafe (last 30d)
-    ├── calcareers_watch.yml        # Daily — CalCareers (California state jobs)
-    ├── usajobs_watch.yml           # Daily — USAJOBS (federal jobs, no API key)
-    ├── localgov_watch.yml          # Daily — NEOGOV + CalOpps (state & local gov)
+    ├── calcareers_watch.yml        # Manual-only — CalCareers
+    ├── usajobs_watch.yml           # Manual-only — USAJOBS
+    ├── localgov_watch.yml          # Manual-only — NEOGOV + CalOpps
     ├── linkedin_watch_backup.yml   # Watchdog :33 PT — re-dispatches missed runs
     ├── weekly_digest.yml           # Weekly — optional Pushover summary brief
-    ├── triage.yml                  # Nightly — optional fit scoring (needs secrets)
-    ├── evals.yml                   # Triage-agent evals (optional)
+    ├── triage.yml                  # Manual-only — legacy AI fit scoring
+    ├── evals.yml                   # Manual-only — legacy model evals
     └── sync_upstream.yml           # Weekly — auto-merge code updates from upstream
 ```
 
 ## Tuning the search
 
-Everything you'd adjust lives in [**`config.json`**](config.json) (no code edits) — the scraper and dashboard both read it: - `keywords.include` — title-match terms · `keywords.exclude` — titles to drop. - `search_terms.*` — queries sent to LinkedIn, Indeed, Glassdoor, ZipRecruiter, Google Jobs, HiringCafe, CalCareers, USAJOBS, GovernmentJobs/NEOGOV, and any curated Workday boards. - `locations.*` — LinkedIn `geoId`, JobSpy `location` + `country`, and Google query location text. - `location_filter.terms` — substrings used to post-filter boards (curated direct-ATS sweep, NEOGOV) that don't support geo-scoping at the API level. - `google_jobs.queries` — optional exact Google Jobs search-box strings; Google Jobs API fallback credentials should be stored as GitHub Actions secrets. - `jobspy` — optional proxies/user-agent for blocked JobSpy-backed boards; prefer GitHub Actions secrets for proxy credentials. - `hiring_cafe` — optional page-depth guardrail. - `employers.priority` (allowlist for the digest) / `employers.exclude` (drop). - `priority_topics` (⭐ highlights) · `role_categories` (Role-filter buckets) · `profile` (dashboard + digest branding).
+Everything you'd adjust lives in [**`config.json`**](config.json) (no code edits) — the scraper and dashboard both read it:
+
+- `search_scope` — canonical role families, primary terms, UK geography, and international-remote discovery policy.
+- `skills` — existing strengths, AI-transition strengths, and non-excluding development opportunities.
+- `negative_domains` — later ranking/classification signals, not Phase 2 substring filters.
+- `keywords.include` — positive title-match terms; `keywords.exclude` — only unequivocal hard exclusions.
+- `search_terms.*` — bounded queries sent to each enabled board.
+- `locations.*` — source-specific execution locations.
+- `location_filter.terms` — basic discovery allow-list; matching `Remote` retains the role but says nothing about China eligibility.
+- `google_jobs.queries` — paired UK and international-remote queries, with explicit fallback locale context.
+- `priority_topics` — highlighted specialties; `role_categories` — dashboard-only Role buckets; `profile` — branding.
 
 Generate the whole file from your CV with [`docs/cv-to-config-prompt.md`](docs/cv-to-config-prompt.md), or edit it by hand (every key is commented).

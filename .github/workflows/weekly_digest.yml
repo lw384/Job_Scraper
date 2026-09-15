@@ -2,7 +2,7 @@ name: Weekly Job Digest
 
 on:
   schedule:
-    # Monday morning after the nightly triage run has had a chance to score jobs.
+    # Optional Monday summary; notify.py exits without sending unless enabled.
     - cron: "30 16 * * 1"
   workflow_dispatch:
     inputs:

@@ -1,15 +1,7 @@
 name: Triage Agent Evals
 
 on:
-  # Auto-run when the scoring system changes. NOTE: the profile/resume live in
-  # Actions secrets — editing a secret does NOT trigger this workflow. After
-  # changing CANDIDATE_PROFILE/CANDIDATE_RESUME, run it manually
-  # (Actions → Triage Agent Evals → Run workflow).
-  push:
-    paths:
-      - triage_agent.py
-      - eval_triage.py
-      - .github/workflows/evals.yml
+  # Legacy model evals are retained for optional manual use only.
   workflow_dispatch:
 
 jobs:

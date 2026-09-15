@@ -7,8 +7,8 @@
 #   3. Enables GitHub Pages (main branch, / root)
 #   4. Sets ENABLE_DATA_COMMITS=true (the variable that makes scrapers save results)
 #   5. Optionally sets Pushover notification secrets
-#   6. Optionally sets Anthropic API key for AI fit-scoring
-#   7. Optionally triggers a first-time backfill run on all watchers
+#   6. Reports that legacy AI scoring is manual-only
+#   7. Optionally triggers first-time backfills for active general job boards
 #
 # Requirements:
 #   gh CLI (https://cli.github.com) installed and authenticated
@@ -177,34 +177,17 @@ else
   fi
 fi
 
-# ── 8. AI fit-scoring via Claude API (optional) ──────────────────────────────────
-step "AI fit-scoring via Claude API (optional)"
+# ── 8. Legacy AI scoring ──────────────────────────────────────────────────────
+step "Legacy AI fit-scoring"
 
-if echo "$EXISTING_SECRETS" | grep -q "^ANTHROPIC_API_KEY$"; then
-  ok "ANTHROPIC_API_KEY already set."
-else
-  info "The triage agent scores each job against your résumé using Claude."
-  info "Costs ~pennies/run. Requires Anthropic API key (anthropic.com/api)."
-  info "Leave blank to skip — the triage.yml workflow is disabled by default."
-  API_KEY=$(ask "Anthropic API Key (press Enter to skip):")
-  if [ -n "$API_KEY" ]; then
-    printf '%s' "$API_KEY" | gh secret set ANTHROPIC_API_KEY \
-      && ok "ANTHROPIC_API_KEY set." \
-      || warn "Failed to set ANTHROPIC_API_KEY."
-    info "Also set CANDIDATE_PROFILE and CANDIDATE_RESUME secrets:"
-    info "  gh secret set CANDIDATE_PROFILE   # paste your short profile, Ctrl+D when done"
-    info "  gh secret set CANDIDATE_RESUME    # paste your résumé text, Ctrl+D when done"
-    info "Then enable the triage.yml workflow: Actions → Nightly Job Triage → Enable workflow"
-  else
-    info "Skipped. triage.yml stays disabled — no AI scoring, no cost."
-  fi
-fi
+info "triage.yml and evals.yml are manual-only during deterministic-first development."
+info "This setup script does not configure or enable Anthropic scoring."
 
 # ── 9. First-time backfill (optional) ───────────────────────────────────────────
 step "First-time backfill (optional)"
 
-info "A backfill seeds your dataset with 30–61 days of historical listings."
-info "Recommended for new setups — takes ~5 minutes for all watchers."
+info "A backfill seeds general job-board data with 30–61 days of listings."
+info "Legacy priority-employer and US-specific sources remain manual-only."
 TRIGGER=$(ask "Run backfill now? [y/N]:")
 
 if [[ "${TRIGGER,,}" =~ ^y ]]; then
@@ -213,25 +196,13 @@ if [[ "${TRIGGER,,}" =~ ^y ]]; then
     ["indeed_watch.yml"]="backfill"
     ["ziprecruiter_watch.yml"]="backfill"
     ["hiringcafe_watch.yml"]="backfill"
-    ["localgov_watch.yml"]="backfill"
-    ["scrape_jobs.yml"]="backfill"
   )
-  # These don't have a backfill toggle — normal run is a full snapshot
-  NO_BACKFILL_WATCHERS=("calcareers_watch.yml" "usajobs_watch.yml")
 
   for wf in "${!WATCHERS[@]}"; do
     if gh workflow run "$wf" --field backfill=true 2>/dev/null; then
       info "  ✓ Triggered: $wf (with backfill)"
     else
       info "  – Skipped: $wf (not found or workflow disabled)"
-    fi
-  done
-
-  for wf in "${NO_BACKFILL_WATCHERS[@]}"; do
-    if gh workflow run "$wf" 2>/dev/null; then
-      info "  ✓ Triggered: $wf (full snapshot)"
-    else
-      info "  – Skipped: $wf"
     fi
   done
 
