@@ -32,7 +32,7 @@ require future technical designs and substantial implementation ExecPlans.
 
 Build on the canonical data platform to provide:
 
-- Canonical role classification.
+- Normalized role classification.
 - Deterministic eligibility filtering before probabilistic analysis.
 - Structured job-description analysis.
 - Fit Score as a relatively stable measure of role fit.

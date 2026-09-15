@@ -42,14 +42,18 @@ contain stale runtime claims; re-inspect implementation before using them.
 
 | Material | Treatment |
 |---|---|
-| [Earlier requirements](requirements.md) | Superseded project scope, preserved without rewriting its historical body. |
-| [Phase 0 baseline](phase-0-baseline.md) | Dated baseline evidence; its passing test report is not current test status. |
-| [Phase 2 personal configuration](phase-2-personal-config.md) | Earlier configuration milestone; not Application Intelligence Phase 2. |
-| [AI triage guide](AGENT_README.md) | Existing legacy feature guide, not repository agent operating instructions or a commitment to its suggested next steps. |
+| [Legacy requirements](references/legacy-requirements.md) | Superseded project scope, preserved without rewriting its historical body. |
+| [Legacy Phase 0 baseline](references/legacy-phase-0-baseline.md) | Dated baseline evidence; its passing test report is not current test status. |
+| [Legacy Phase 2 personal configuration](references/legacy-phase-2-personal-config.md) | Earlier configuration milestone; not Application Intelligence Phase 2. |
+| [Legacy AI triage guide](legacy-ai-triage.md) | Existing legacy feature reference, never repository agent operating instructions or a commitment to its suggested next steps. |
 | [Claude guide](../CLAUDE.md) | Earlier tool guide; common operating rules are owned by AGENTS.md. |
-| [Scraper deep dive](deep-dive/job-scraper-2026-04-21.md) and [session changes](deep-dive/job-scraper-changes-2026-04-21.md) | Historical explanations of older code. |
-| [Dashboard deep dive](deep-dive/triage-dashboard-2026-05-27.html) | Historical dashboard explanation; older cache behaviour is not the current contract. |
-| [Salary plan](deep-dive/salary-in-digests-plan.html) and [pre-audit version](deep-dive/salary-in-digests-plan.pre-audit.html) | Historical plans; not active ExecPlans under the new contract. |
+| [Scraper deep dive](references/deep-dive/job-scraper-2026-04-21.md) and [session changes](references/deep-dive/job-scraper-changes-2026-04-21.md) | Historical explanations of older code. |
+| [Dashboard deep dive](references/deep-dive/triage-dashboard-2026-05-27.html) | Historical dashboard explanation; older cache behaviour is not the current contract. |
+| [Salary plan](references/deep-dive/salary-in-digests-plan.html) and [pre-audit version](references/deep-dive/salary-in-digests-plan.pre-audit.html) | Historical plans; not active ExecPlans under the new contract. |
+
+Historical inspection records preserve their inspection-time paths. This catalog
+provides current locations; old names in historical prose or source comments do
+not establish an alternative agent contract.
 
 [CV-to-config prompt](cv-to-config-prompt.md) remains a user helper; the actual
 configuration and its loaders govern execution. [Dashboard demo](triage.gif) is

@@ -21,6 +21,9 @@ for responsibilities. No Postgres shadow write or cutover is implemented.
 
 - The governing documentation foundation is established. No active ExecPlan or
   Phase 1 technical design exists yet; absent document families are intentional.
+  Historical requirements, older phase reports, and deep dives live under
+  `docs/references/`; the separately named legacy AI feature guide is linked from
+  [the catalog](README.md). Use those current locations rather than older names.
 - Current job persistence authority remains the existing JSON path. The master is
   cumulative, while the dashboard also reads source snapshots. Target storage
   authority changes belong to [Architecture](../ARCHITECTURE.md#intended-storage-authority-transition).
@@ -57,13 +60,13 @@ and jsonschema 4.26.0 in an isolated environment, with bytecode/cache writes dis
 
 ```text
 PYTHONDONTWRITEBYTECODE=1 python -m pytest tests/ -q --ignore=tests/local -p no:cacheprovider
-185 passed; 2 failed; exit code 1
+187 passed; 0 failed; exit code 0
 ```
 
-Both failures are in [test_master_jobs_file_merge.py](../tests/test_master_jobs_file_merge.py):
-`test_preserves_existing_fields_on_duplicate` and `test_preserves_false_tag_on_duplicate`.
-Fixed August `first_seen` fixture dates are pruned by the current 30-day merge before
-the preservation assertions, producing `StopIteration`. They remain unfixed.
+All six tests in [test_master_jobs_file_merge.py](../tests/test_master_jobs_file_merge.py)
+also passed separately. That module now pins the scraper's clock to the fixture's
+2026-08-15 reference time, so field-preservation tests do not age out with the real
+date. Existing assertions and production 30-day retention semantics are unchanged.
 This does not establish Python 3.11 CI, live collection, browser, delivery, or model
 health. The [audit](references/current-repository-audit.md) preserves broader dated evidence.
 
