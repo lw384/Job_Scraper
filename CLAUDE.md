@@ -1,8 +1,13 @@
+> **Operating rules superseded.** Read [AGENTS.md](AGENTS.md) for the common agent
+> contract and [the documentation catalog](docs/README.md) for current context.
+> This earlier guide is retained as legacy reference; its runtime claims and
+> restrictions must not override implementation evidence or the governing documents.
+
 # Job Scraper — Claude Code Guide
 
 ## What this project is
 
-GitHub Actions pipelines that scrape job boards (LinkedIn, Indeed, Glassdoor, ZipRecruiter, Google Jobs, HiringCafe, USAJOBS, CalCareers, NEOGOV/CalOpps) on a schedule, commit results to the repo, and serve them through a filterable triage dashboard (`triage.html`) hosted on GitHub Pages.
+GitHub Actions pipelines that scrape general job boards on a schedule, commit results to the repo, and serve them through a filterable triage dashboard (`triage.html`) hosted on GitHub Pages. Legacy US-specific sources remain available by manual dispatch.
 
 Designed to be forked. No server. No paid services required (AI triage is optional).
 
@@ -10,21 +15,22 @@ Designed to be forked. No server. No paid services required (AI triage is option
 
 | File | Purpose |
 |------|---------|
-| `config.json` | User's search config — keywords, locations, employers. Gitignored upstream. Copy from `config.example.json`. |
+| `config.json` | Tracked Ivy / Wei search scope — roles, geography, skills, and source query settings. Contains no secrets. |
 | `config.example.json` | Documented template. **Do not edit** — kept for upstream sync. |
-| `scoring_profile.json` | AI triage calibration — fit/poor-fit terms. Gitignored upstream. Copy from `scoring_profile.example.json`. |
+| `scoring_profile.json` | Deterministic ranking rules — fit/poor-fit terms. Gitignored upstream. Copy from `scoring_profile.example.json`. |
 | `scrape_jobs.py` | Main scraper. Dispatched by all watcher workflows. |
 | `triage_agent.py` | Claude API fit-scoring agent. Run by `triage.yml`. |
 | `triage.html` | The dashboard. Pure client-side JS; reads `output/*.json` at page-load time. |
-| `output/` | All scraped data (gitignored upstream). `all_jobs.json` = 14-day rolling master. |
+| `output/` | All scraped data (gitignored upstream). `all_jobs.json` = 30-day rolling operational store. |
 
 ## Workflow architecture
 
 All 18 workflows live in `.github/workflows/`. Pattern:
-- **Watcher workflows** (`*_watch.yml`, `scrape_jobs.yml`) run on cron, call `scrape_jobs.py`, then commit to `output/` when `vars.ENABLE_DATA_COMMITS == 'true'`.
+- **Active general-board watcher workflows** run on cron, call `scrape_jobs.py`, then commit to `output/` when `vars.ENABLE_DATA_COMMITS == 'true'`.
+- **Priority-employer and US-specific workflows** are retained for manual dispatch only.
 - **Concurrency group** `job-scraper-commit-push` serializes all commits (prevents push conflicts).
-- **`triage.yml`** scores new roles via Claude API nightly. Disabled by default — requires `ANTHROPIC_API_KEY`, `CANDIDATE_PROFILE`, `CANDIDATE_RESUME` secrets.
-- **`sync_upstream.yml`** rebases the fork weekly on upstream. Safer than GitHub's "Sync fork" button.
+- **`triage.yml` / `evals.yml`** are manual-only legacy AI paths and require `ANTHROPIC_API_KEY`, `CANDIDATE_PROFILE`, and `CANDIDATE_RESUME` secrets.
+- **`sync_upstream.yml`** merges upstream into the fork weekly. Safer than GitHub's "Sync fork" button.
 
 ## Required GitHub configuration (for a fork to work)
 
@@ -54,8 +60,8 @@ Verify everything is configured:
 pip install -r requirements.txt        # only for Indeed/Glassdoor/ZipRecruiter/Google
 python scrape_jobs.py --linkedin-only
 python scrape_jobs.py --indeed-only
-python scrape_jobs.py --hiringcafe
-python scrape_jobs.py --usajobs
+python scrape_jobs.py --hiringcafe-only
+python scrape_jobs.py --usajobs-only       # legacy source; manual use only
 ```
 
 ### Serve the dashboard locally
