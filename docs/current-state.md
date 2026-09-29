@@ -19,8 +19,11 @@ for responsibilities. No Postgres shadow write or cutover is implemented.
 
 ## Current Engineering State
 
-- The governing documentation foundation is established. No active ExecPlan or
-  Phase 1 technical design exists yet; absent document families are intentional.
+- The governing documentation foundation is established. The
+  [canonical Job domain design](design-docs/canonical-job-model.md) is Accepted.
+  The [Canonical Job foundation ExecPlan](exec-plans/active/canonical-job-foundation.md)
+  is Active; implementation has not started. Other absent document families are
+  intentional.
   Historical requirements, older phase reports, and deep dives live under
   `docs/references/`; the separately named legacy AI feature guide is linked from
   [the catalog](README.md). Use those current locations rather than older names.
@@ -32,9 +35,9 @@ for responsibilities. No Postgres shadow write or cutover is implemented.
   and browser-local annotations until their replacements are explicitly validated.
   Inspect affected producers/consumers; the audit is evidence, not a replacement
   for executable compatibility checks.
-- Immediate focus: define the canonical Job contract in relation to current records
-  and compatibility exports before implementation. No schema format or fields are
-  selected by this handoff.
+- Immediate focus: execute the bounded milestones in the active Canonical Job
+  foundation plan, beginning with its tests and executable domain contract. JSON
+  remains primary throughout that plan.
 
 ## Known Issues Relevant to Current Work
 
@@ -72,9 +75,10 @@ health. The [audit](references/current-repository-audit.md) preserves broader da
 
 ## Next Recommended Milestone
 
-Design the canonical Job model and its relationship to current source records,
-master records, and JSON compatibility output. Identify the authoritative executable
-contract and acceptance expectations without assuming a database layout.
+Begin Milestone 1 of the
+[active Canonical Job foundation plan](exec-plans/active/canonical-job-foundation.md):
+write the domain contract tests, then add the smallest executable representation.
+No database layout is selected and no implementation work has begun.
 
 The next agent should update this handoff when active work, blockers, or verified
 state changes. Keep task progress in its ExecPlan and history in Git/closed plans;
