@@ -20,13 +20,13 @@ Detailed responsibilities belong to the following documents:
 
 - [Agent operating contract](AGENTS.md): repository-wide agent rules and approval
   boundaries.
-- [Roadmap](docs/ROADMAP.md): phase sequence and desired outcomes.
-- [Current engineering handoff](docs/CURRENT_STATE.md): current work state and next
+- [Roadmap](docs/roadmap.md): phase sequence and desired outcomes.
+- [Current engineering handoff](docs/current-state.md): current work state and next
   handoff.
 - [Documentation catalog](docs/README.md): navigation and document-family authority.
-- [Canonical Job model](docs/design-docs/canonical-job-model.md): detailed Canonical
+- [Canonical Job model](docs/designs/canonical-job-model.md): detailed Canonical
   Job, Source Observation, identity, and provenance design.
-- [Active ExecPlans](docs/exec-plans/active/): implementation, validation, and
+- [Active ExecPlans](docs/plans/active/): implementation, validation, and
   progress for authorized work.
 
 ---
@@ -471,7 +471,7 @@ TRANSITION records the safe architecture path. It does not replace the roadmap o
 | 5. Eligibility/Fit/Priority and Notion workflow | Accepted roadmap direction; detailed product/integration designs absent | No integrated authority yet |
 | 6. Career analytics and Obsidian exchange | Accepted roadmap direction; detailed design absent | Human/Obsidian retain personal-knowledge authority |
 
-The [current handoff](docs/CURRENT_STATE.md) and active ExecPlan own live progress. If they disagree with this table, re-inspect implementation and update the stale owning document in the same reviewed change.
+The [current handoff](docs/current-state.md) and active ExecPlan own live progress. If they disagree with this table, re-inspect implementation and update the stale owning document in the same reviewed change.
 
 ### 6.2 Canonical domain transition
 
@@ -586,7 +586,7 @@ CURRENT update when the implementation is real
 
 Existing accepted design:
 
-- [Canonical Job model](docs/design-docs/canonical-job-model.md): domain boundaries, identity, provenance, unknown semantics and JSON compatibility.
+- [Canonical Job model](docs/designs/canonical-job-model.md): domain boundaries, identity, provenance, unknown semantics and JSON compatibility.
 
 Designs still required before their corresponding implementation:
 

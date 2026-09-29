@@ -16,7 +16,7 @@ external communications, and every application submission.
 
 Optimize for fewer unnecessary human decisions and higher-quality applications,
 not for the maximum number of collected jobs or automated actions. Product phases
-belong in [the roadmap](docs/ROADMAP.md); detailed user behaviour belongs in
+belong in [the roadmap](docs/roadmap.md); detailed user behaviour belongs in
 accepted product specifications.
 
 ## Authority and evidence
@@ -60,7 +60,7 @@ workflow, and deployment health.
 For substantial work, read progressively:
 
 1. This file.
-2. [Current handoff](docs/CURRENT_STATE.md).
+2. [Current handoff](docs/current-state.md).
 3. Relevant CURRENT or TARGET sections of [Architecture](ARCHITECTURE.md).
 4. The linked active ExecPlan, if one exists.
 5. Relevant accepted product specs, ADRs, and technical designs.
@@ -243,12 +243,12 @@ decision needed, and what that decision would unlock.
 
 - Agent rules: `AGENTS.md`
 - Architecture: `ARCHITECTURE.md`
-- Roadmap: `docs/ROADMAP.md`
+- Roadmap: `docs/roadmap.md`
 - Plan contract: `PLANS.md`
-- Current handoff: `docs/CURRENT_STATE.md`
+- Current handoff: `docs/current-state.md`
 - Catalog: `docs/README.md`
-- Canonical job design: `docs/design-docs/canonical-job-model.md`
-- Active plans: `docs/exec-plans/active/`
+- Canonical job design: `docs/designs/canonical-job-model.md`
+- Active plans: `docs/plans/active/`
 - Historical evidence: `docs/references/`
 
 Use cataloged product-spec, ADR/design, runbook, and evaluation families when they

@@ -2,7 +2,7 @@
 
 > **Documentation navigation:** use [the catalog](docs/README.md). Personal-config
 > references to Phase 2 below use earlier customization numbering; current Job
-> Search OS phases are defined by [ROADMAP.md](docs/ROADMAP.md).
+> Search OS phases are defined by [the roadmap](docs/roadmap.md).
 
 GitHub Actions pipelines that scrape general job boards on a schedule, commit the results to the repo, and surface them in a single filterable [`triage.html`](#interactive-triage-dashboard--triagehtml) dashboard hosted **free** on GitHub Pages — with a map, salary harmonization, cross-source de-duplication, notes, bulk workflow states, CSV export, application-packet prompts, and optional phone notifications. Legacy US-specific sources remain available for manual dispatch. **No server, no paid services, and no API keys required.**
 
@@ -14,9 +14,9 @@ GitHub Actions pipelines that scrape general job boards on a schedule, commit th
 
 ------------------------------------------------------------------------
 # Contributions welcome!
-Found an issue? Please [Open a New Issue](issues/new). The community will do our best to address it!
+Found an issue? Please [open a new issue](https://github.com/lw384/Job_Scraper/issues/new). The community will do our best to address it!
 
-[Pull requests](./pulls) are highly welcome and encouraged! Much thanks to [Sahil Talwar](https://github.com/sahiltalwar88) for making the first improvement through this approach!!
+[Pull requests](https://github.com/lw384/Job_Scraper/pulls) are highly welcome and encouraged! Much thanks to [Sahil Talwar](https://github.com/sahiltalwar88) for making the first improvement through this approach!!
 
 # Set up your own (full walkthrough) 🚀
 

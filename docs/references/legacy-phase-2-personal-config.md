@@ -1,6 +1,6 @@
 > **Historical reference — earlier configuration milestone.** The Phase 2 name
 > below uses the earlier customization numbering, not Application Intelligence
-> Phase 2. This document does not govern [the current roadmap](../ROADMAP.md).
+> Phase 2. This document does not govern [the current roadmap](../roadmap.md).
 > Re-verify runtime claims; use [the catalog](../README.md) for current context.
 
 # Phase 2 — Ivy / Wei Personal Search Configuration

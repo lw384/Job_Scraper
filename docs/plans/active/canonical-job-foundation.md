@@ -2,7 +2,7 @@
 
 Status: Active
 Classification: PLAN
-Last updated: 2026-09-16
+Last updated: 2026-09-29 (documentation paths only; implementation status unchanged)
 
 Starting revision: `e266dca245b4c355758637f5b9f81db7ca4dc06b`, qualified
 by a local working tree that already contains the Accepted canonical Job design
@@ -13,7 +13,7 @@ as work proceeds rather than treated as a static checklist.
 ## Purpose / Big Picture
 
 Implement the first bounded foundation described by the
-[Accepted canonical Job design](../../design-docs/canonical-job-model.md), while the
+[Accepted canonical Job design](../../designs/canonical-job-model.md), while the
 existing JSON pipeline remains authoritative. The observable result is an executable
 Python domain contract for a Canonical Job and its source observations, explicit
 legacy-to-canonical and canonical-to-legacy adapters, and a controlled Indeed path
@@ -441,10 +441,10 @@ dashboard without editing state; record that as manual evidence, not an automate
 guarantee. Do not require live board calls, Pushover delivery, model calls or remote
 workflow execution to close this milestone.
 
-Update this plan's actual results, [CURRENT_STATE.md](../../CURRENT_STATE.md), and
+Update this plan's actual results, [current-state.md](../../current-state.md), and
 the CURRENT section of [ARCHITECTURE.md](../../../ARCHITECTURE.md) only if the
 implemented boundary genuinely changes it. Update the Accepted design only for a
-genuine semantic issue requiring user review. ROADMAP normally remains unchanged.
+genuine semantic issue requiring user review. The roadmap normally remains unchanged.
 
 ## Concrete Steps
 
@@ -695,7 +695,7 @@ Final acceptance requires all of the following:
 13. No Postgres/Supabase, Notion, live verifier, broad URL resolver, Phase 2 feature,
     Company entity, numeric similarity threshold or broad refactor is introduced.
 14. Real `output/` is unchanged by tests; CLI flags and workflows are unchanged.
-15. Progress, discoveries, decisions, CURRENT_STATE and implemented architecture
+15. Progress, discoveries, decisions, the current handoff, and implemented architecture
     truth are updated before the plan moves to `completed/`.
 
 Operationally unverified items must be stated: live board reachability, remote
@@ -769,7 +769,7 @@ At closure, replace this placeholder with:
 - the next recommended milestone, without pulling Postgres or later intelligence
   into this completed record.
 
-Move this file to `docs/exec-plans/completed/` only after all acceptance criteria
+Move this file to `docs/plans/completed/` only after all acceptance criteria
 are met, actual validation is recorded, documentation truth is updated, and no
 required work remains. If cancelled or superseded, retain the plan with an explicit
 status/reason rather than implying delivery.

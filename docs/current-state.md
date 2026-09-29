@@ -2,11 +2,12 @@
 
 Classification: CURRENT coordination. Authoritative only for engineering handoff,
 not runtime behaviour. Re-verify implementation claims when they matter.
-Last verified: 2026-09-15, local working tree; remote deployment is unverified.
+Last runtime verification: 2026-09-15, local working tree; remote deployment is
+unverified. Documentation paths and the Git baseline were re-verified on 2026-09-29.
 
 ## Active Phase
 
-Phase 1 — Foundation and Data Platform, as defined by [the roadmap](ROADMAP.md).
+Phase 1 — Foundation and Data Platform, as defined by [the roadmap](roadmap.md).
 This is the active engineering direction, not a claim that Phase 1 is implemented.
 
 ## Current Production Path
@@ -20,8 +21,8 @@ for responsibilities. No Postgres shadow write or cutover is implemented.
 ## Current Engineering State
 
 - The governing documentation foundation is established. The
-  [canonical Job domain design](design-docs/canonical-job-model.md) is Accepted.
-  The [Canonical Job foundation ExecPlan](exec-plans/active/canonical-job-foundation.md)
+  [canonical Job domain design](designs/canonical-job-model.md) is Accepted.
+  The [Canonical Job foundation ExecPlan](plans/active/canonical-job-foundation.md)
   is Active; implementation has not started. Other absent document families are
   intentional.
   Historical requirements, older phase reports, and deep dives live under
@@ -51,10 +52,10 @@ for responsibilities. No Postgres shadow write or cutover is implemented.
   notification identity, and URL-keyed scores/annotations are not one shared
   contract. Inspect `scrape_jobs.py::_job_identity`, `triage.html::dedupe`, and
   `notify.py::_identity` before changing identifiers.
-- The working tree contains pre-existing tracked edits and untracked material.
-  `config.json` is untracked locally despite older prose calling it tracked.
-  Inspect Git status before editing; remote configured search and deployment cannot
-  be inferred from this checkout.
+- Git state is task-local evidence. At the start of the 2026-09-29 documentation
+  path migration, the working tree was clean and `config.json` was tracked. Inspect
+  Git status before editing; remote configured search and deployment cannot be
+  inferred from this checkout.
 
 ### Verified local test state
 
@@ -76,7 +77,7 @@ health. The [audit](references/current-repository-audit.md) preserves broader da
 ## Next Recommended Milestone
 
 Begin Milestone 1 of the
-[active Canonical Job foundation plan](exec-plans/active/canonical-job-foundation.md):
+[active Canonical Job foundation plan](plans/active/canonical-job-foundation.md):
 write the domain contract tests, then add the smallest executable representation.
 No database layout is selected and no implementation work has begun.
 

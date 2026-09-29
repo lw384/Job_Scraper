@@ -15,7 +15,8 @@ review_cycle: monthly
 
 > 目标：让你可以像管理一支小型工程团队一样指挥 Codex，从产品想法一路推进到可验证、可回滚、可继续迭代的软件，而不是靠一个很长的对话和一组一次性提示词。
 
-配套系统设计文档：[Human_Software_LLM_Agent_Job_Search_OS_Design.md](Human_Software_LLM_Agent_Job_Search_OS_Design.md)
+当前仓库的权威设计入口是 [Architecture](../../ARCHITECTURE.md)；文档职责与路径以
+[documentation catalog](../README.md) 为准。
 
 ---
 
@@ -25,7 +26,7 @@ review_cycle: monthly
 
 1. 在仓库根目录维护一个不超过约 150 行的 `AGENTS.md`，只放长期有效的操作契约、禁止事项、验证入口和文档地图。
 2. 把当前架构、目标架构、数据不变量、运行方式分别放进独立文档，不把它们全部塞进 `AGENTS.md`。
-3. 每个较大的功能先写一份 `docs/tasks/active/JOS-xxx-*.md`；定义目标、范围、验收、风险、回滚和人工审批点，再让 Codex 实施。
+3. 每个较大的功能先写一份 `docs/plans/active/JOS-xxx-*.md`；定义目标、范围、验收、风险、回滚和人工审批点，再让 Codex 实施。
 4. 一项任务对应一个 Git 分支、一个 worktree、一个主要写入 Agent。需要并行时，并行不同任务，不让多个 Agent 同时修改同一组文件。
 5. 每次交给 Codex 的指令都包含：目标、事实来源、范围、禁止事项、验收证据、文档更新责任和停止条件。
 6. 合并前必须看到真实证据：测试结果、关键输出、数据库迁移演练、界面截图或运行日志。Agent 的“已完成”不是证据。
@@ -108,18 +109,18 @@ review_cycle: monthly
 
 ### 2.2 唯一控制平面
 
-在开始阶段，**仓库中的任务文件是控制平面**：
+在开始阶段，**当前交接和活动 ExecPlan 是仓库内控制平面**：
 
 ```text
-docs/tasks/backlog/    尚未承诺
-docs/tasks/ready/      已有清楚验收，可领取
-docs/tasks/active/     正在执行，一任务一工作区
-docs/tasks/review/     已有证据包，等待审查
-docs/tasks/done/       已验收的历史记录
-docs/tasks/blocked/    明确写出阻塞与所需输入
+docs/current-state.md  当前活动任务、阻塞和下一步交接
+docs/plans/active/     已授权并正在执行的计划
+docs/plans/completed/  已完成、取消或被替代的计划；首个计划结束时才创建
 ```
 
-如果以后采用 GitHub Issues、Linear 或自建编排器，状态可以迁移到任务平台，但仓库仍保存可执行规范、ADR、schema、eval 和关键决策。不要同时让聊天、Notion、GitHub Issue 和 Markdown 各自保存一套不一致的“真实进度”。
+`BACKLOG / READY / REVIEW / BLOCKED` 可以保存在任务平台或 active plan 的状态与
+进度中，不要为每个状态创建空目录。如果以后采用 GitHub Issues、Linear 或自建
+编排器，仓库仍保存可执行规范、ADR、schema、eval 和关键决策。不要同时让聊天、
+Notion、GitHub Issue 和 Markdown 各自保存一套不一致的“真实进度”。
 
 ### 2.3 一个任务的状态机
 
@@ -144,14 +145,15 @@ REVIEW
 
 ## 3. 推荐仓库目录
 
-下面是目标目录。不要第一天创建所有空目录；在出现第一份真实内容时再创建对应文档族。
+下面是与当前 documentation catalog 一致的目标目录。不要第一天创建所有空目录；
+在出现第一份真实内容时再创建对应文档族。
 
 ```text
 job-search-os/
 ├── AGENTS.md                         # 短小的 Agent 操作契约与导航地图
 ├── README.md                         # 人类入口：产品、快速开始、当前能力
 ├── ARCHITECTURE.md                   # CURRENT / TARGET 高层架构
-├── WORKFLOW.md                       # 从任务领取到合并的标准流程
+├── PLANS.md                          # ExecPlan 规则与生命周期
 ├── pyproject.toml                    # 或项目实际依赖配置
 ├── .env.example                      # 仅变量名与安全示例，绝无真实 secret
 ├── .gitignore
@@ -164,50 +166,19 @@ job-search-os/
 │       └── daily-digest.yml
 ├── docs/
 │   ├── README.md                     # 文档目录、权威归属、状态说明
+│   ├── roadmap.md                    # 产品/工程结果与阶段顺序
 │   ├── current-state.md              # 当前工作、阻塞、下一步；短期交接
-│   ├── product/
-│   │   ├── vision.md
-│   │   ├── user-journeys.md
-│   │   └── success-metrics.md
-│   ├── architecture/
-│   │   ├── system-context.md
-│   │   ├── data-flow.md
-│   │   ├── trust-boundaries.md
-│   │   └── integrations.md
-│   ├── decisions/
-│   │   ├── ADR-0001-authoritative-store.md
-│   │   └── ADR-0002-notion-field-ownership.md
-│   ├── tasks/
-│   │   ├── backlog/
-│   │   ├── ready/
-│   │   ├── active/
-│   │   ├── review/
-│   │   ├── blocked/
-│   │   └── done/
-│   ├── runbooks/
-│   │   ├── local-development.md
-│   │   ├── scraper-failure.md
-│   │   ├── restore-sqlite.md
-│   │   ├── migration-rollback.md
-│   │   ├── notion-sync-recovery.md
-│   │   └── rotate-secrets.md
-│   ├── evaluations/
-│   │   ├── job-extraction.md
-│   │   ├── fit-scoring.md
-│   │   ├── canonical-matching.md
-│   │   └── daily-digest.md
-│   ├── invariants/
-│   │   ├── data.md
-│   │   ├── safety.md
-│   │   └── architecture.md
-│   ├── checklists/
-│   │   ├── definition-of-ready.md
-│   │   ├── definition-of-done.md
-│   │   ├── migration-review.md
-│   │   └── release-review.md
-│   ├── templates/                    # 第 13 节模板的仓库副本
-│   ├── generated/                    # 只能由工具生成；不要手改
-│   └── references/                   # 带日期的研究、审计和外部资料摘要
+│   ├── designs/                      # 已存在：持久技术设计
+│   ├── plans/
+│   │   ├── active/                   # 已存在：活动 ExecPlan
+│   │   └── completed/                # 首个计划真正结束时才创建
+│   ├── guides/                       # 已存在：人类指南
+│   ├── references/                   # 已存在：历史和点时证据
+│   ├── product-specs/                # 有首份详细产品规格时才创建
+│   ├── decisions/                    # 有首份独立 ADR 时才创建
+│   ├── runbooks/                     # 有首份已验证操作手册时才创建
+│   ├── evaluations/                  # 有首份质量规范时才创建
+│   └── generated/                    # 有生成器和首份产物时才创建
 ├── schemas/
 │   ├── source-observation.schema.json
 │   ├── canonical-job.schema.json
@@ -260,9 +231,9 @@ job-search-os/
 - `AGENTS.md`：操作契约、证据优先级和渐进式阅读入口；
 - `ARCHITECTURE.md`：CURRENT 与 TARGET；
 - `PLANS.md`：ExecPlan 契约；
-- `docs/CURRENT_STATE.md`：当前交接；
-- `docs/design-docs/canonical-job-model.md`：已接受的 Canonical Job 语义；
-- `docs/exec-plans/active/`：活动计划。
+- `docs/current-state.md`：当前交接；
+- `docs/designs/canonical-job-model.md`：已接受的 Canonical Job 语义；
+- `docs/plans/active/`：活动计划。
 
 因此，如果继续在现有仓库演进，不要平行创建另一套同义目录。优先映射：
 
@@ -271,9 +242,9 @@ job-search-os/
 | Agent 操作契约 | `AGENTS.md` |
 | 当前/目标架构 | `ARCHITECTURE.md` |
 | 任务执行计划规则 | `PLANS.md` |
-| 当前交接 | `docs/CURRENT_STATE.md` |
-| 活动任务计划 | `docs/exec-plans/active/` |
-| 领域模型设计 | `docs/design-docs/canonical-job-model.md` |
+| 当前交接 | `docs/current-state.md` |
+| 活动任务计划 | `docs/plans/active/` |
+| 领域模型设计 | `docs/designs/canonical-job-model.md` |
 | 参考审计 | `docs/references/` |
 
 **重要冲突：**现有仓库已记录长期向 Postgres/Supabase 迁移的方向；本手册的 SQLite 是适合个人本地优先 v0/v1 的推荐示例。若在现有仓库采用 SQLite 作为目标权威存储，必须新建 ADR，说明它是临时阶段、永久方向还是替换原决策，并经你批准。Agent 不得把本手册当成默许的架构改写授权。
@@ -611,8 +582,8 @@ Merge：更新 current state，进入下一任务
 
 先读：
 - AGENTS.md
-- docs/tasks/active/JOS-014-sqlite-daily-digest.md
-- docs/invariants/data.md
+- docs/plans/active/JOS-014-sqlite-daily-digest.md
+- docs/designs/<owning-design>.md
 - docs/runbooks/migration-rollback.md
 
 范围：src/digest、src/storage、相关 tests 和 owning docs。
@@ -697,7 +668,8 @@ Human 写清楚：
 
 > 我每天面对 30 个岗位，实际只能认真处理 3 个。我需要系统先排除明显不符合地点/工作权的岗位，再从剩余岗位中给出 3 个有解释的优先项。系统不得替我判断未写明的签证条件，也不得自动投递。
 
-产物：`docs/product/daily-queue-problem.md` 或已有 vision 的更新。
+产物：已有 roadmap 的更新，或在确有首份详细规格时创建
+`docs/product-specs/daily-queue.md`。
 
 ### 阶段 2：问题调查与 CURRENT 基线
 
@@ -876,8 +848,8 @@ Human 重点看：
 
 合并后：
 
-- task 移入 `done`；
-- 更新 `current-state.md`；
+- plan 移入 `docs/plans/completed/`；
+- 更新 `docs/current-state.md`；
 - 若 worktree 干净且分支已合并，再安全移除；
 - 若是数据/行为变化，观察一个定义好的窗口；
 - 不因合并成功就立刻删除旧数据或回滚路径。
@@ -1340,7 +1312,7 @@ daily_digest:
 目标：建立基本纪律，不改系统架构。
 
 - 精简 `AGENTS.md`；
-- 建 `docs/current-state.md` 和一个 active task；
+- 建 `docs/current-state.md` 和一个 `docs/plans/active/` 下的 active plan；
 - 记录真实测试命令；
 - 使用 branch + PR；
 - 每个任务有验收与验证结果；
@@ -1924,4 +1896,3 @@ OpenAI 的两篇文章最值得迁移的并不是“让 Agent 写所有代码”
 2. Alex Kotliarskyi, Victor Zhu, Zach Brock, OpenAI, [An open-source spec for Codex orchestration: Symphony](https://openai.com/index/open-source-codex-orchestration-symphony/), 2026-04-27.
 3. OpenAI Developers, [Codex](https://developers.openai.com/learn/codex).
 4. OpenAI Developers Cookbook, [Using Goals in Codex](https://developers.openai.com/cookbook/examples/codex/using_goals_in_codex).
-

@@ -34,7 +34,7 @@ discrepancies; section 12 identifies compatibility surfaces.
 **TARGET:** establish shared semantic boundaries before selecting an executable
 model or persistence layout. Existing JSON and consumers should remain operational
 until explicit replacements are implemented and validated, following
-[the roadmap](../ROADMAP.md). This design does not make the current JSON schema the
+[the roadmap](../roadmap.md). This design does not make the current JSON schema the
 permanent internal domain representation.
 
 ## 2. Scope and Non-goals
@@ -214,7 +214,7 @@ boundary, not a database-table proposal.
 ### 4.4 Verification State
 
 **TARGET, accepted conceptual vocabulary:** `LIVE / CLOSED / UNKNOWN`, as recorded
-in [the roadmap](../ROADMAP.md). A separate verification assessment describes
+in [the roadmap](../roadmap.md). A separate verification assessment describes
 availability supported by evidence at a check time:
 
 - `LIVE`: sufficient evidence that the opening is currently accepting applications.
@@ -733,4 +733,4 @@ Accepted does not mean implemented: code, schema and tests must later establish
 executable conformance. A future bounded ExecPlan owns implementation scope and
 its acceptance contract. The
 [point-in-time audit](../references/current-repository-audit.md) remains historical
-inspection evidence; [CURRENT_STATE.md](../CURRENT_STATE.md) owns only the handoff.
+inspection evidence; [current-state.md](../current-state.md) owns only the handoff.

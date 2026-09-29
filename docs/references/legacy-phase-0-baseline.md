@@ -1,7 +1,7 @@
 > **Historical reference — earlier phase numbering.** This is the dated baseline
 > report from the earlier customization scope, not current phase direction or test
-> status. Use [ROADMAP.md](../ROADMAP.md) for current phases and
-> [CURRENT_STATE.md](../CURRENT_STATE.md) for the engineering handoff.
+> status. Use [the current roadmap](../roadmap.md) for current phases and
+> [the current engineering handoff](../current-state.md) for active coordination.
 
 # Phase 0 Baseline Report
 
@@ -168,4 +168,3 @@ If a later change breaks one of the currently covered scraper invariants, the te
 suite can now detect it reproducibly. A green suite does **not** prove that every live
 source, workflow, browser interaction, notification, or model evaluation still works;
 those remain explicit coverage gaps for later targeted work and real-data acceptance.
-

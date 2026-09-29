@@ -208,8 +208,8 @@ Roadmap phases are desired outcomes, not implementation-status claims. Use:
 - [`current-state.md`](current-state.md) for the active engineering handoff and
   next milestone.
 - [`PLANS.md`](../PLANS.md) for ExecPlan requirements and lifecycle.
-- `plans/active/` for concrete implementation progress, evidence, and recovery.
-- `designs/` for durable technical contracts and decisions.
+- `docs/plans/active/` for concrete implementation progress, evidence, and recovery.
+- `docs/designs/` for durable technical contracts and decisions.
 - Future product specifications for detailed user behaviour, examples, and
   acceptance semantics.
 - [`docs/README.md`](README.md) for documentation ownership and routing.

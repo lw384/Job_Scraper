@@ -2,7 +2,9 @@
 
 Classification: **REFERENCE / NAVIGATION**
 
-Status: **PROPOSED replacement for `docs/README.md`**
+Status: **Accepted**
+
+Last reviewed: 2026-09-29
 
 This file is the authoritative catalog for documentation responsibilities,
 locations, lifecycle, ownership, naming, and update routing. It tells humans and
@@ -73,7 +75,7 @@ After all acceptance criteria and handoff work are complete, move the plan to:
 docs/plans/completed/<task-slug>.md
 ```
 
-Create `plans/completed/` only when the first plan is actually completed. Moving
+Create `docs/plans/completed/` only when the first plan is actually completed. Moving
 a plan requires updating this catalog, `current-state.md`, and all inbound links.
 
 ---
@@ -201,18 +203,18 @@ change. Update only documents whose owned truth changed.
 
 | Change produced or discovered | Owning location | Required action | Human gate |
 |---|---|---|---|
-| Task progress, commands, discoveries, validation, or task-local decisions | Active ExecPlan under `plans/active/` | Update throughout the task | Human reviews scope, acceptance, and risk decisions |
+| Task progress, commands, discoveries, validation, or task-local decisions | Active ExecPlan under `docs/plans/active/` | Update throughout the task | Human reviews scope, acceptance, and risk decisions |
 | Active task, blocker, verified state, or next handoff changed | [`current-state.md`](current-state.md) | Update the concise handoff | Human input only when a product decision or fact is needed |
 | Verified implementation boundary changed | `ARCHITECTURE.md`, CURRENT | Update in the same reviewed change with implementation evidence | Review required |
 | Accepted target architecture changed | Relevant design/ADR plus `ARCHITECTURE.md`, TARGET | Record rationale, acceptance, and linked target change | Explicit human acceptance |
 | Migration stage, temporary authority, cutover criterion, or recovery boundary changed | `ARCHITECTURE.md`, TRANSITION plus active plan/runbook | Update transition state and evidence | Explicit approval for first production writes and authority cutover |
 | Product outcome or phase sequence changed | [`roadmap.md`](roadmap.md) | Update accepted outcomes or sequencing | Human approval |
 | Detailed user behaviour, examples, or acceptance semantics changed | Owning product specification, when one exists | Update spec and affected acceptance tests | Human approves product semantics |
-| Durable technical contract changed | Owning file under `designs/`, executable schema/contract, and tests | Update all affected authorities together | Human review for material semantics |
+| Durable technical contract changed | Owning file under `docs/designs/`, executable schema/contract, and tests | Update all affected authorities together | Human review for material semantics |
 | User-visible setup, configuration, command, or workflow changed | Root `README.md` or an owning guide | Update instructions and verify examples/smoke path | Review required |
 | Repeated or high-risk operation changed | Owning runbook, when one exists | Update steps, validation, failure, and recovery instructions | Human approval for high-risk actions |
 | LLM, prompt, matching, ranking, or Agent behaviour changed | Versioned prompt/config plus owning evaluation spec and results | Re-run relevant evaluation and record cost/latency/quality evidence | Human approves business gates and risk slices |
-| Point-in-time investigation completed | `references/` | Add dated evidence with scope and limitations | No architecture acceptance implied |
+| Point-in-time investigation completed | `docs/references/` | Add dated evidence with scope and limitations | No architecture acceptance implied |
 | Document added, moved, renamed, reclassified, superseded, or retired | This catalog | Update catalog and all inbound links in the same change | Review required |
 | No durable documentation truth changed | Active plan or review packet | Record `Documentation impact: none` with a reason | None beyond normal review |
 
